@@ -565,6 +565,7 @@
 ]{biblatex}
 
 \addbibresource{rho.bib}
+\addbibresource{input-taxonomies.bib}
 
 %----------------------------------------------------------
 

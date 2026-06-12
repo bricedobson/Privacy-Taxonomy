@@ -87,6 +87,9 @@
 
 %----------------------------------------------------------
 
+\defbibfilter{taxonomyonly}{keyword=taxonomy}
+\defbibfilter{referencesonly}{not keyword=taxonomy}
+
 \begin{document}
 
     \maketitle
@@ -217,13 +220,17 @@ Generative AI was used in the completion in this work in the following ways.
 \end{itemize}
 \subsection*{Full Data Model}
 \subsection*{Full Listing of Input Taxonomies}
+\begin{refsection}
+\nocite{*}
+\printbibliography[heading=none,filter=taxonomyonly]
+\end{refsection}
 \subsection*{Summary Analysis Statistics}
 \section*{References}
 %----------------------------------------------------------
 	Bibliography management is handled by \inlinecode{biblatex}, with the default citation and reference style set to IEEE. The \inlinecode{citestyle=numeric-comp} option is enabled, allowing multiple citations to be grouped within a single bracket (e.g., \cite{davis2023signalflow,bell2022codefont}). The citation format can be customized directly in \inlinecode{rho.cls} to suit any preferred style.
 
 \textbf{A quick note on references at this stage:} The core work of this entire project is about identifying references, extracting a very small piece of information (the implied data relationship(s)), and aggregating and normalizing these pieces. At this early stage in the project, I have not yet performed any analytical work to code the references, but I am putting them here as evidence of work completed. I expect the final report to “offload” a significant portion of these to an appendix. My working approach is that the References section will be only the works actually referenced in the report and the appendix will contain all of the sources consulted for the narrow purpose of extracting their implied data relationships. In short, I know it’s long and it’s probably going to get longer before it gets shorter. I don’t want it to be cause for alarm, as the report structure firms up, a significant portion will be offloaded as they won’t be directly referenced.  
-\printbibliography
+\printbibliography[filter=referencesonly]
 
 %----------------------------------------------------------
 
