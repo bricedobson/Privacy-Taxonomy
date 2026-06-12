@@ -56,6 +56,9 @@
 %----------------------------------------------------------
 
 \defbibfilter{taxonomyonly}{keyword=taxonomy}
+\defbibfilter{taxonomyindependentstandards}{keyword=taxonomy and keyword=standards}
+\defbibfilter{taxonomycommercialtools}{keyword=taxonomy and keyword=commercial}
+\defbibfilter{taxonomyacademicwork}{keyword=taxonomy and keyword=academic}
 \defbibfilter{referencesonly}{not keyword=taxonomy}
 
 \begin{document}
@@ -193,7 +196,12 @@ Generative AI was used in the completion in this work in the following ways.
 \textbf{TODO:} Fix numbering issue on bibligography-split.
 \begin{refsection}
 \nocite{*}
-\printbibliography[heading=none,filter=taxonomyonly]
+\subsubsection*{Independent Standards}
+\printbibliography[heading=none,filter=taxonomyindependentstandards]
+\subsubsection*{Commercial Tools}
+\printbibliography[heading=none,filter=taxonomycommercialtools]
+\subsubsection*{Academic Work}
+\printbibliography[heading=none,filter=taxonomyacademicwork]
 \end{refsection}
 \clearpage
 \subsection*{Appendix C:Summary Analysis Statistics}
