@@ -148,7 +148,7 @@ The DPV, as an ontology, does not consider object attributes, typing, or keys. A
 \section{Observations and Analysis}
 \subsection{Prerequisite Definitions}
 \subsection{Latent Decision Points}
-\sybsection[Misc.]
+\subsection{Misc.}
 \subsection{Issues}
 \subsection{The Positioning of Purpose}
 \subsection{Internal Hierarchies}
@@ -167,12 +167,9 @@ There are at least three heirarchcies that every orgznization meeting the profil
 \section{Limitations, Qualifications, and Future Work}
 
 \section{Conclusions}
-\onecolumn
-\section*{Appendices}
-\clearpage
-\subsection*{Acknowledgments}
+
+\section*{Acknowledgments}
  This document was compiled using \href{https://github.com/MemoJimenez/Rho-class}{Rho-class}, a \LaTeX{} template developed by Guillermo Jimenez.
-\clearpage
 \subsection*{GitHub Repository}
     Visit the repository to access the source code, track ongoing development, report issues, and stay up to date with the latest changes.
     \begin{center}
@@ -181,7 +178,6 @@ There are at least three heirarchcies that every orgznization meeting the profil
              \faGithub &  \url{https://github.com/MemoJimenez/Rho-class}\\
         \end{tabular}
     \end{center}
-\clearpage
 \subsection*{AI Use Disclosures}
 Generative AI was used in the completion in this work in the following ways.
 \begin{itemize}
@@ -189,7 +185,8 @@ Generative AI was used in the completion in this work in the following ways.
     \item Formatting support with \LaTeX and BibTeX
     \item Transforming the analysis schema to a format compatible with the web-based explorer.
 \end{itemize}
-\clearpage
+\onecolumn
+\section*{Appendices}
 \subsection*{Appendix A: Full Data Model}
 \clearpage
 \subsection*{Appendix B: Full Listing of Input Taxonomies}
@@ -199,11 +196,14 @@ Generative AI was used in the completion in this work in the following ways.
 \printbibliography[heading=none,filter=taxonomyonly]
 \end{refsection}
 \clearpage
-\subsection*{Summary Analysis Statistics}
+\subsection*{Appendix C:Summary Analysis Statistics}
+\clearpage
 \section*{References}
 %----------------------------------------------------------
-	Bibliography management is handled by \inlinecode{biblatex}, with the default citation and reference style set to IEEE. The \inlinecode{citestyle=numeric-comp} option is enabled, allowing multiple citations to be grouped within a single bracket (e.g., \cite{davis2023signalflow,bell2022codefont}). The citation format can be customized directly in \inlinecode{rho.cls} to suit any preferred style.
 
+\textbf{TODO: Define citation and reference style, currently set as IEEE with citestyle=numeric-comp }
+\newline
+\newline
 \textbf{A quick note on references at this stage:} The core work of this entire project is about identifying references, extracting a very small piece of information (the implied data relationship(s)), and aggregating and normalizing these pieces. At this early stage in the project, I have not yet performed any analytical work to code the references, but I am putting them here as evidence of work completed. I expect the final report to “offload” a significant portion of these to an appendix. My working approach is that the References section will be only the works actually referenced in the report and the appendix will contain all of the sources consulted for the narrow purpose of extracting their implied data relationships. In short, I know it’s long and it’s probably going to get longer before it gets shorter. I don’t want it to be cause for alarm, as the report structure firms up, a significant portion will be offloaded as they won’t be directly referenced.  
 \printbibliography[filter=referencesonly]
 
