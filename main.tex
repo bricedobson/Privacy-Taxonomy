@@ -1,36 +1,5 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% --------------------------------------------------------
-%  ____  _           
-% |  _ \| |__   ___  
-% | |_) | '_ \ / _ \ 
-% |  _ <| | | | (_) |
-% |_| \_\_| |_|\___/ 
-%
-% LaTeX2e Template
-% Version 3.0.1 (15/04/2026)
-%
-% Author: 
-% Guillermo Jimenez (memo.notess1@gmail.com)
-% 
-% Contributor:
-% Eduardo Gracidas (eduardo.gracidas29@gmail.com)
-%
-% License:
-% Creative Commons CC BY 4.0
-% --------------------------------------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% --------------------------------------------------------
-% Find the latest version on GitHub:
-% https://github.com/MemoJimenez/Rho-class
-% --------------------------------------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \documentclass[9pt,letterpaper,twocolumn,twoside]{rho-class/rho}
 \usepackage[english]{babel}
-
-%% Spanish babel recomendation
-% \usepackage[spanish,es-nodecimaldot,es-noindentfirst]{babel}
-
 %----------------------------------------------------------
 % Title
 %----------------------------------------------------------
@@ -42,7 +11,7 @@
 % Authors, Affiliations and dates
 %----------------------------------------------------------
 
-\author[{\textasteriskcentered},a,1]{Brice Dobson, \textit{Georgia Institute of Technology}}
+\author[{\textasteriskcentered},a,1]{\textbf{Brice Dobson}, \textit{Georgia Institute of Technology}, Atlanta, GA, USA}
 
 %----------------------------------------------------------
 
@@ -76,8 +45,7 @@
 %----------------------------------------------------------
 
 \begin{abstract}
-    The W3C Data Privacy Vocabulary (DPV) is the broadest and most comprehensive ontology for describing the domain of personal data processing in a regulatory context. However, as an ontology, it stops short of defining mandatory characteristics such as record structures and typing, attribute-key relationships, and cardinality; leaving these deferred to individual implementations. We examine these by analyzing and reconciling dozens of subdomain-specific taxonomies, producing a reference implementation of the DPV as a comprehensive organization-level data model for privacy. In doing so, we surface latent data relationships as well as the design decisions, considerations, and implementation issues implicit in the DPV. We then consider how these data structures may evolve as an organization matures its privacy practices, using the Carnegie Mellon Maturity Model Integration (CMMI) as a grounding framework.
-
+    \textbf{TODO:} Additional results/findings to be added as work progresses. \newline The W3C Data Privacy Vocabulary (DPV) is the broadest and most comprehensive ontology for describing the domain of personal data processing in a regulatory context. However, as an ontology, it stops short of defining mandatory characteristics such as record structures and typing, attribute-key relationships, and cardinality; leaving these deferred to individual implementations. We examine these by analyzing and reconciling dozens of subdomain-specific taxonomies, producing a reference implementation of the DPV as a comprehensive organization-level data model for privacy. In doing so, we surface latent data relationships as well as the design decisions, considerations, and implementation issues implicit in the DPV. We then consider how these data structures may evolve as an organization matures its privacy practices, using the Carnegie Mellon Maturity Model Integration (CMMI) as a grounding framework. 
     
 \end{abstract}
 
@@ -201,8 +169,9 @@ There are at least three heirarchcies that every orgznization meeting the profil
 \section{Conclusions}
 \onecolumn
 \section*{Appendices}
+\textbf{TODO:} Make subsections appear on their own pages.
 \subsection*{Acknowledgments}
- This document was compiled using a \LaTeX template developed by Guillermo Jimenez.
+ This document was compiled using \href{https://github.com/MemoJimenez/Rho-class}{Rho-class}, a \LaTeX{} template developed by Guillermo Jimenez.
 \subsection*{GitHub Repository}
     Visit the repository to access the source code, track ongoing development, report issues, and stay up to date with the latest changes.
     \begin{center}
@@ -218,8 +187,9 @@ Generative AI was used in the completion in this work in the following ways.
     \item Formatting support with \LaTeX and BibTeX
     \item Transforming the analysis schema to a format compatible with the web-based explorer.
 \end{itemize}
-\subsection*{Full Data Model}
-\subsection*{Full Listing of Input Taxonomies}
+\subsection*{Appendix A: Full Data Model}
+\subsection*{Appendix B: Full Listing of Input Taxonomies}
+\textbf{TODO:} Fix numbering issue on bibligography-split.
 \begin{refsection}
 \nocite{*}
 \printbibliography[heading=none,filter=taxonomyonly]
