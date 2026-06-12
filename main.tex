@@ -90,8 +90,6 @@
 \defbibfilter{taxonomyonly}{keyword=taxonomy}
 \defbibfilter{referencesonly}{not keyword=taxonomy}
 
-\nocite{*}
-
 \begin{document}
 
     \maketitle
@@ -222,7 +220,10 @@ Generative AI was used in the completion in this work in the following ways.
 \end{itemize}
 \subsection*{Full Data Model}
 \subsection*{Full Listing of Input Taxonomies}
+\begin{refsection}
+\nocite{*}
 \printbibliography[heading=none,filter=taxonomyonly]
+\end{refsection}
 \subsection*{Summary Analysis Statistics}
 \section*{References}
 %----------------------------------------------------------
