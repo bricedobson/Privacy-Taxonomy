@@ -1,0 +1,231 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --------------------------------------------------------
+%  ____  _           
+% |  _ \| |__   ___  
+% | |_) | '_ \ / _ \ 
+% |  _ <| | | | (_) |
+% |_| \_\_| |_|\___/ 
+%
+% LaTeX2e Template
+% Version 3.0.1 (15/04/2026)
+%
+% Author: 
+% Guillermo Jimenez (memo.notess1@gmail.com)
+% 
+% Contributor:
+% Eduardo Gracidas (eduardo.gracidas29@gmail.com)
+%
+% License:
+% Creative Commons CC BY 4.0
+% --------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --------------------------------------------------------
+% Find the latest version on GitHub:
+% https://github.com/MemoJimenez/Rho-class
+% --------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[9pt,letterpaper,twocolumn,twoside]{rho-class/rho}
+\usepackage[english]{babel}
+
+%% Spanish babel recomendation
+% \usepackage[spanish,es-nodecimaldot,es-noindentfirst]{babel}
+
+%----------------------------------------------------------
+% Title
+%----------------------------------------------------------
+
+% \doctype{Capstone Report}
+\title{\textbf{Performing a taxonomy-informed semantic reconciliation of the W3C Data Privacy Vocabulary to surface implementation considerations, decision points, and issues.}}
+
+%----------------------------------------------------------
+% Authors, Affiliations and dates
+%----------------------------------------------------------
+
+\author[{\textasteriskcentered},a,1]{Brice Dobson, \textit{Georgia Institute of Technology}}
+
+%----------------------------------------------------------
+
+%\affil[a]{The Georgia Institute of Technology}
+
+%----------------------------------------------------------
+
+\dates{DRAFT - This manuscript was compiled on \today}
+
+%----------------------------------------------------------
+% Corresponding author-, Document- information
+%----------------------------------------------------------
+
+%\corres{\textsuperscript{\textasteriskcentered}Corresponding author: \href{mailto:author.one@institute.org}{author.one@institute.org} (A. One).}
+%\corres{\textsuperscript{\textdagger}These authors contributed equally to this work.}
+
+%----------------------------------------------------------
+
+%\docinfo{This document class was prepared on Overleaf and compiled with pdf\LaTeX{}. No errors were found during the compilation process. Rho-class supports external editors, though additional setup may be required.} 
+
+%----------------------------------------------------------
+
+\journalname{PUBP 6727}
+\journal{DRAFT}
+\theday{This file was compiled on \today}
+%\vol{DRAFT}
+%\no{DRAFT}
+
+%----------------------------------------------------------
+% Abstract and Keywords
+%----------------------------------------------------------
+
+\begin{abstract}
+    The W3C Data Privacy Vocabulary (DPV) is the broadest and most comprehensive ontology for describing the domain of personal data processing in a regulatory context. However, as an ontology, it stops short of defining mandatory characteristics such as record structures and typing, attribute-key relationships, and cardinality; leaving these deferred to individual implementations. We examine these by analyzing and reconciling dozens of subdomain-specific taxonomies, producing a reference implementation of the DPV as a comprehensive organization-level data model for privacy. In doing so, we surface latent data relationships as well as the design decisions, considerations, and implementation issues implicit in the DPV. We then consider how these data structures may evolve as an organization matures its privacy practices, using the Carnegie Mellon Maturity Model Integration (CMMI) as a grounding framework.
+
+    
+\end{abstract}
+
+%----------------------------------------------------------
+
+\keywords{Data Privacy, Privacy Ontology, Privacy Taxonomy, Privacy Operations, Privacy Data Model, W3C DPV, CMMI}
+
+%----------------------------------------------------------
+
+\begin{document}
+
+    \maketitle
+    \thispagestyle{firststyle}
+
+%----------------------------------------------------------
+\tableofcontents
+\section{Introduction}
+
+\rhostart{o}rganizations, especially larger ones with multi-jurisdictional privacy compliance imperatives, implicitly manage many seemingly disparate categories of privacy-relevant information. Examples include data flows and inventories, processes/activities, purposes and lawful bases, notices, consent records, invocation of individual rights, compliance and risk assessments, and more. Many taxonomies, frameworks, and operational models exist for individual privacy task domains (referred to here as subdomains). The most foundational of these is the World Wide Web Consortium (W3C) Data Privacy Vocabulary (DPV), but as an ontology fundamentally, it leaves significant room for misapplication by implementers who may fail to consider the latent data relationships that are required to be made explicit during operationalization. Luckily, there are hundreds of reference taxonomies for specific domains within data privacy published by academic researchers, international standards organizations, and implicitly within commercial products. While these often have higher normalization and robustness due to their necessity for applied use, interoperability in adjacent processes is almost never addressed within these but remains an eventuality organizations must face as they seek to improve maturity, where these organizations design and operate internal controls within these privacy domains in their efforts to comply with increasingly stringent and detailed legal requirements. Ultimately, this is a problem of semantic compatibility and inadequate contextualization with increase of scope, where disconnected taxonomies produce inconsistent terminology and data, duplication without clear authority, and unrecognized or unclear relationships. 
+\\
+As a result, organizations meeting this profile often rely on the subsequent data to draw conclusions in contexts where that data is not sufficiently precise, normalized, or complete for the purpose. This creates both operational and legal compliance challenges such as exceeding purpose specification which erodes lawful bases of processing, inadequate recognition and fulfillment of individual rights, and missed opportunity through poor application of legal requirements.
+\\
+Altogether, this highlights a condition faced by almost all large organizations in this space today, where the volume and importance of privacy-relevant data is increasing based on external growth and internal investment within the domain, but there is an industry-wide maturity gap where fragmented and tool-bound processes lead to fragmented data faster than organizations can normalize the data relationships to make control capabilities legally reliable and defensible. In summary, the problem is created at the intersection of all the following conditions:
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{p{0.45\linewidth} p{0.45\linewidth}}
+
+    \rowcolor{rhocolor}
+    \multicolumn{1}{>{\centering\arraybackslash}m{0.45\linewidth}}
+    {\textcolor{white}{\textbf{External Conditions}}}
+    &
+    \multicolumn{1}{>{\centering\arraybackslash}m{0.45\linewidth}}
+    {\textcolor{white}{\textbf{Internal Conditions}}}
+    \\
+
+    \begin{enumerate}
+        \item Large organizations tend to be bound by many regulatory schemes in the data privacy domain.
+        \item Regulation largely does not codify the data relationships of the concepts they seek to govern.
+    \end{enumerate}
+    &
+    \begin{enumerate}
+        \item Organizations make many decisions during operationalization of privacy requirements that create data relationships; many of these decisions are implicit or the result of tool-binding.
+        \item As these organizations mature processes that generate privacy regulatory data, the data relationships may require forced normalization.
+    \end{enumerate}
+    \\
+
+    \end{tabular}
+\end{table}
+
+    \subsection{Context and Motivation}
+   
+    \subsection{Problem Definition and Impacts}
+    \subsection{Objective and Intended Use}
+        In all cases, the intended primary users and beneficiaries of this work are individuals who both: 
+    \begin{itemize}
+        \item Represent an organization with multi-jurisdictional privacy obligations. 
+        \item Have responsibilities for privacy governance (informally defined as the interconnection between privacy processes) or responsibility defining process execution requirements within single privacy-relevant process domains. 
+    \end{itemize}
+
+
+While there are certainly others who may draw value from this work in smaller pieces, but a grounding principle is the idea that the deliverable should first be technical enough for use by domain experts but also well-documented enough to be applied by reasonably experienced practitioners as a practical reference. 
+
+\section{Background}
+\subsection{The Evolving Regulatory Environment}
+     At least 144 countries now have laws addressing privacy and data protection obligations of organizations. Simultaneously, individuals are becoming more aware of their rights as data subjects and of legal expectations for organizations in this space, with industry reporting a 128\% increase in individual rights requests rate per-million identities in just a two-year period. This growth is amplified in part by enforcement increasing in breadth and depth, with the early actions grounded in data security issues/breach giving way to lawful basis and individual right issues that now represent one-third and one-quarter of known GDPR enforcement actions respectively.
+\subsection{Ontologies, taxonomies, and schemas, oh my!}
+    Key Points for this Section
+    \begin{enumerate}
+        \item The DPV is the broadest single framework, but has a limit to its benefit as an ontology.
+        \item 
+    \end{enumerate}
+\subsection{Commercial Privacy Tools}
+\subsection{Large Organizations and Process Maturity}
+    Within large organizations, privacy-related spending appears to be accelerating with the share of these globally spending more than \$5 million USD on privacy increasing from 14\% to 38\%, or approximately 171\% growth. In parallel, 93\% of organizations who have at least one dedicated privacy professional, a superset of large organizations, reported plans to increase privacy and data governance investment over the next two years, and 80\% of chief privacy officers report responsibility for at least one privacy-adjacent domain such as data governance, responsible A.I., or platform liability.
+
+
+\section{Methodology}
+    At a high level, the methodology will consist of the following milestones: 
+    \begin{enumerate}
+        \item Identify the domains of the W3C DPV, standardize/sort as needed.
+        \item Identify taxonomies that relate to one or more DPV domains.
+        \item Code each identified taxonomy to domain
+        \item For each DPV domain; enumerate all data relationships implied through taxonomies. 
+        \item For each domain; remove duplicates, reconcile conflicts, and normalize to at least a target normalization level (yet to be defined). 
+        \item Highlight and explore root causes of conflicts and normalization issues. This becomes the content of the report.
+        \item Document
+    \end{enumerate}
+\subsection{Readying the DPV}
+The DPV, as an ontology, does not consider object attributes, typing, or keys. As a result, it must be prepared to receive these during operationalization. This requires the creation of boundaries, that ultimately form the domains of related concepts that define the taxonomy search. The number of two way cross-boundary relationships should be minimized.
+\subsection{Identification of Input Taxonomies}
+    Input taxonomies were identified through targeted searches of published independent standards, academic papers, as implemented in commercial tools within that specific subdomain. For each subdomain, a target of the three highest quality taxonomies was sought. Quality was evaluated relatively as a function of breadth, or number of topics within the subdomain explicitly accounted for, and readiness for implementation, that is, the apparent presence and completeness of likely required attributes like relevant typing, attribute-key relationships, and consideration for operationally relevant metadata.
+\subsection{Identifying Data Relationships within the Taxonomies}
+    Working by subdomain, each taxonomy was coded with the internal (within the subdomain) and external (beyond the subdomain) relationship(s) implied through its content. Small semantic differences were reconciled, de-duplication was applied, and testing was performed to ensure a consistent level of normalization (TODO: confirm this level) had been applied to internal data structures.
+\subsection{Testing and Evaluation}
+    Tables and attributes were defined.
+    
+\section{Observations and Analysis}
+\subsection{Prerequisite Definitions}
+\subsection{Latent Decision Points}
+\sybsection[Misc.]
+\subsection{Issues}
+\subsection{The Positioning of Purpose}
+\subsection{Internal Hierarchies}
+There are at least three heirarchcies that every orgznization meeting the profile experiences, that are not contemplated by the DPV.  1) (Business) Process 2) Supervision 3) Geographic and a likely 4th that shares tight but not complete alignemnt is beneficial ownership/affiliate companies.  Almost all privacy dat problems are the result of the intersection of these issues.
+
+\section{Measurement}
+
+\section{Proposed Solution}
+    This is a complex problem addressable only at the organization level that ultimately relies on responsible individuals implementing organizational data models with appropriate contextualization, there is no bypass of this. The approach represents a distillation of common structurally-grounded issues and considerations in an accessible place, with the hope that they may be more readily found and applied by practitioners. The idea is that there is value in the DPV as a framework to interconnect otherwise disparate domain taxonomies and a forced mapping of a high-quality subset of the hundreds of these would yield considerations, decision points, and conflicts that the DPV is largely silent on from the implementer perspective. Thus, if these are known and can be made explicit, errors in the application of data models can be reduced through planning and decision making during organizational implementations.
+    
+\section{Evaluation}
+        Why not get stakeholder feedback at this stage? This initial work seeds <dozens> of high-quality taxonomies, each of which has been validated by varying degrees of stakeholder feedback by virtue of becoming high-quality. This is too specific to request feedback in generalities; rather, when feedback is eventually sought, it should be the product of rigorous testing. Further, the subject of the evaluation should really be the identified considerations, decision points, and issues surfaced from the analysis.
+        
+        Use Commercial Tools
+
+\section{Future Work}
+
+\section{Limitations and Qualifications}
+
+\section{Conclusions}
+
+\section{Appendices}
+\subsection{Acknowledgments}
+ This document was compiled using a \LaTeX template developed by Guillermo Jimenez.
+\subsection{GitHub Repository}
+    Visit the repository to access the source code, track ongoing development, report issues, and stay up to date with the latest changes.
+    \begin{center}
+        \setlength{\tabcolsep}{3pt}
+        \begin{tabular}{cl}
+             \faGithub &  \url{https://github.com/MemoJimenez/Rho-class}\\
+        \end{tabular}
+    \end{center}
+\subsection{AI Use Disclosures}
+Generative AI was used in the completion in this work in the following ways.
+\begin{itemize}
+    \item Conversion of source metadata to BibTeX format.
+    \item Formatting support with \LaTeX and BibTeX
+    \item Transforming the analysis schema to a format compatible with the web-based explorer.
+\end{itemize}
+\subsection{Full Data Model}
+\subsection{Summary Analysis Statistics}
+\section{References}
+%----------------------------------------------------------
+	Bibliography management is handled by \inlinecode{biblatex}, with the default citation and reference style set to IEEE. The \inlinecode{citestyle=numeric-comp} option is enabled, allowing multiple citations to be grouped within a single bracket (e.g., \cite{davis2023signalflow,bell2022codefont}). The citation format can be customized directly in \inlinecode{rho.cls} to suit any preferred style.
+
+\textbf{A quick note on references at this stage:} The core work of this entire project is about identifying references, extracting a very small piece of information (the implied data relationship(s)), and aggregating and normalizing these pieces. At this early stage in the project, I have not yet performed any analytical work to code the references, but I am putting them here as evidence of work completed. I expect the final report to “offload” a significant portion of these to an appendix. My working approach is that the References section will be only the works actually referenced in the report and the appendix will contain all of the sources consulted for the narrow purpose of extracting their implied data relationships. In short, I know it’s long and it’s probably going to get longer before it gets shorter. I don’t want it to be cause for alarm, as the report structure firms up, a significant portion will be offloaded as they won’t be directly referenced.  
+\printbibliography
+
+%----------------------------------------------------------
+
+\end{document}
