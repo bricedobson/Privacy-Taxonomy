@@ -1,5 +1,295 @@
 \documentclass[9pt,letterpaper,twocolumn,twoside]{rho-class/rho}
 \usepackage[english]{babel}
+\usepackage{longtable}
+% --- Progress Report (no rho formatting) ---
+% Turn off headers/footers and use plain layout for the cover
+\pagestyle{empty}
+% Switch to one column for the progress Report Only
+\onecolumn
+\begin{document}
+% ================= Progress Report =================
+\begin{left}
+    \textbf{Section:}  PUBP
+\end{left}
+\\
+\begin{center}
+    % Put your cover content here; this page is generic and
+    % does not use any special rho-class formatting.
+
+    {\LARGE \textbf{\textbf{A taxonomy-informed semantic reconciliation of the W3C Data Privacy Vocabulary focused on implementation considerations, decision points, and issues.}}}
+\\[0.5cm]
+    {\large Brice Dobson}
+\end{center}
+
+\section*{Bottom-Line Up Front/What's New}
+Hi Dr. Kuerbis and anyone else who reads my progress report! 
+\\
+\\
+For this second report and hopefully the remaining ones, you will see that I'm adding some additional structure and I've decided to include my full report draft a bit earlier than the course requires. This is the result of some reflection on Progress Report 1, where I spent more time than I'd have liked on compiling and summarizing work. I'm sure the first progress report ends up being the most time intensive, but you will see that in some sections within this progress report, I may link to or embed the current state of my draft report as long as the underlying content is sufficient in my view. This will help me manage the opportunity cost of doing a good job on the progress reports, forces me to do higher quality work within my actual work product, and hopefully also demonstrates my actual work instead of some summary assertion.
+\\
+\\
+\textbf{P.S.:} You may notice this document has a look and feel a bit different than the Microsoft Word default, especially in my draft report. I have wanted an excuse to learn and apply~\LaTeX ~for several years and this course is providing the perfect opportunity to do that.
+
+\section*{Problem Statement}
+ 
+Organizations, especially larger ones with multi-jurisdictional privacy
+compliance imperatives, implicitly manage many seemingly disparate
+categories of privacy-relevant information. Examples include data flows
+and inventories, processes/activities, purposes and lawful bases,
+notices, consent records, invocation of individual rights, compliance
+and risk assessments, and more. Many taxonomies, frameworks, and
+operational models exist for individual privacy task domains. The most
+foundational of these is the World Wide Web Consortium (W3C) Data Privacy
+Vocabulary (DPV), but as an ontology fundamentally, it leaves significant
+room for misapplication by implementers who may fail to consider the
+latent data relationships that are required to be made explicit during
+operationalization. Luckily, there are hundreds of reference taxonomies
+for specific domains within data privacy published by academic
+researchers, international standards organizations, and implicitly within
+commercial products. While these often have higher normalization and
+robustness due to their necessity for applied use, interoperability in
+adjacent processes is almost never addressed within these but remains an
+eventuality organizations must face as they seek to improve maturity,
+where these organizations design and operate internal controls within
+these privacy domains in their efforts to comply with increasingly
+stringent and detailed legal requirements. Ultimately, this is a problem
+of semantic compatibility and inadequate contextualization with increase
+of scope, where disconnected taxonomies produce inconsistent terminology
+and data, duplication without clear authority, and unrecognized or
+unclear relationships. As a result, organizations meeting this profile
+often rely on the subsequent data to draw conclusions in contexts where
+that data is not sufficiently precise, normalized, or complete for the
+purpose. This creates both operational and legal compliance challenges
+such as exceeding purpose specification which erodes lawful bases of
+processing, inadequate recognition and fulfillment of individual rights,
+and missed opportunity through poor application of legal requirements.
+ 
+Altogether, this highlights a condition faced by almost all large
+organizations today, where the volume and importance of privacy-relevant
+data is increasing based on external growth and internal investment
+within the domain, but there is an industry-wide maturity gap where
+fragmented and tool-bound processes lead to fragmented data faster than
+organizations can normalize the data relationships to make control
+capabilities legally reliable and defensible. In summary, the problem is
+created at the intersection of all the following conditions:
+ 
+\begin{itemize}
+  \item External Conditions
+  \begin{itemize}
+    \item Large organizations tend to be bound by many regulatory schemes in the data privacy domain.
+    \item Regulation largely does not codify the data relationships of the concepts they seek to govern.
+  \end{itemize}
+
+  \item Internal Conditions
+  \begin{itemize}
+    \item Organizations make many decisions during operationalization of privacy requirements that create data relationships, many of these decisions are implicit or the result of tool-binding.
+    \item As these organizations mature processes that generate privacy regulatory data, the data relationships may require forced normalization.
+  \end{itemize}
+\end{itemize}
+% =====================================================================
+\section*{Solution Statement}
+ 
+This is a complex problem addressable only at the organization level that
+ultimately relies on responsible individuals implementing organizational
+data models with appropriate contextualization, there is no bypass of
+this. The approach represents a distillation of common
+structurally-grounded issues and considerations in an accessible place,
+with the hope that they may be more readily found and applied by
+practitioners. The idea is that there is value in the DPV as a framework
+to interconnect otherwise disparate domain taxonomies and a forced
+mapping of a high-quality subset of the hundreds of these would yield
+considerations, decision points, and conflicts that the DPV is largely
+silent on from the implementer perspective. Thus, if these are known and
+can be made explicit, errors in the application of data models can be
+reduced through planning and decision making during organizational
+implementations.
+ 
+The deliverables are anticipated as follows:
+ 
+\begin{itemize}
+  \item \textbf{A Report} -- Ideally, I would like to share this work
+  externally through a pre-print/publication style paper that
+  contextualizes the problem and need, highlights the solution and
+  application considerations, and provides suggestions for areas for
+  further inquiry. I may also feed this into the W3C DPV Project or use
+  it for a future contribution to their own implementation guides, which
+  themselves are only domain specific.
+ 
+  \item \textbf{A Reference (Data) Model and/or Implementation Decision
+  Guide} -- As documented primarily through a GitHub repository and
+  accompanying interactive browser-based presentation that allows for
+  interaction with the model in a user-friendly format (e.g.\ GitHub
+  pages explorer). Functionally, this will be the product of the
+  compilation, technical abstraction, and analytical cross-mapping of
+  existing ontologies, frameworks, taxonomies, and reference data
+  models/schemas. At this stage, I anticipate covering the entire DPV
+  but want to retain the privilege to ``deep dive'' into the most
+  impactful issue areas/areas with important and/or unclear decisions as
+  a function of effort required, timelines, and needed quality standards.
+\end{itemize}
+ 
+In all cases, the intended primary users and beneficiaries of this work
+are individuals who both:
+ 
+\begin{itemize}
+  \item Represent an organization with multi-jurisdictional privacy
+  obligations.
+  \item Have responsibilities for privacy governance (informally defined
+  as the interconnection between privacy processes) or responsibility
+  defining process execution requirements within single privacy-relevant
+  process domains.
+\end{itemize}
+ 
+While there are certainly others who may draw value from this work in
+smaller pieces, but a grounding principle is the idea that the
+deliverable should first be technical enough for use by domain experts
+but also well-documented enough to be applied by reasonably experienced
+practitioners as a practical reference.
+ 
+% =====================================================================
+\section*{Completed Tasks (Last 2 Weeks)}
+ 
+\begin{itemize}
+  \item Preliminary outline of full report, you can see this within the table of contents below.
+  \item Completed identification of all input taxonomies, implemented an informal classification scheme based on utility to project.
+  \item All input taxonomies are now coded per the methodology.
+  \item   Finished all initial formatting for the final report via the LaTeX document created in the last period.
+  \item Developed and implemented "split" bibliographic approach that allows for separate references (inline within the report) vs. the listing of input taxonomies (listed within an appendix).
+  \item I am near complete, the mapping has been performed, however, I have not finished documenting it and then transforming that into the various appendices.
+
+\end{itemize}
+ 
+% =====================================================================
+\section*{Tasks for the Next Project Report}
+ 
+\begin{itemize}
+  \item Design the analysis statistics used for evaluating the mapping/analysis and ideally calculate them.
+  \item Begin working on the web application that allows for visualization of the data model and maturity interaction. 
+  \item Key points for each subsection, except maybe the last few where the relevant information is not yet fully understood.
+\end{itemize}
+ 
+% =====================================================================
+\section*{Questions I have or Issues I'm running into}
+ 
+None yet. The biggest ambiguity I'm running into is if there are rigorous
+methodologies for the type of ontological reconciliation that I'm going
+to perform in the coming weeks. That said, I feel I have a good handle on
+it conceptually, I will do some deeper research in this area, but any tips
+appreciated (e.g.\ ``read about this \textless technique name\textgreater'').
+ 
+% =====================================================================
+\section*{Methodology Paragraph Summary}
+ 
+I have not yet selected the technical methodology for the comparison of
+individual taxonomies and subsequent mapping of entities into the DPV. At
+a high level, the methodology will consist of the following milestones:
+ 
+\begin{itemize}
+  \item Identify the domains of the W3C DPV, standardize/sort as needed.
+  \item Identify taxonomies that relate to one or more DPV domains.
+  \item Code each identified taxonomy to domain.
+  \item For each DPV domain; enumerate all data relationships implied
+  through taxonomies.
+  \item For each domain; remove duplicates, reconcile conflicts, and
+  normalize to at least a target normalization level (yet to be defined).
+  \item Highlight and explore root causes of conflicts and normalization
+  issues. This becomes the content of the report.
+  \item Document.
+\end{itemize}
+ 
+% =====================================================================
+\section*{Timeline}
+ 
+\begin{longtable}{@{}>{\RaggedRight\arraybackslash}p{0.22\textwidth}
+                     >{\RaggedRight\arraybackslash}p{0.55\textwidth}
+                     >{\RaggedRight\arraybackslash}p{0.15\textwidth}@{}}
+\toprule
+\textbf{Week \#} & \textbf{Description of Task} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Week \#} & \textbf{Description of Task} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+W1 (May 18 -- 23)   & Select Topic                              & Complete    \\
+\addlinespace
+W2 (May 24 -- 30)   & Research Initial Proposal                 & Complete    \\
+                    & Draft Initial Proposal                    & Complete    \\
+                    & Edit and Proof Proposal                   & Complete    \\
+                    & Revise, Initial Proposal                  & Complete    \\
+                    & Setup GitHub Repo                         & Complete    \\
+                    & Setup Overleaf/LaTeX Environment          & Complete    \\
+                    & Setup Citation Manager                    & Complete    \\
+                    & Identify Taxonomies -- Standards Orgs     & In Progress \\
+                    & Identify Taxonomies -- Commercial         & In Progress \\
+                    & Identify Taxonomies -- Academic           & In Progress \\
+                    & Identify Taxonomies -- Governmental       & In Progress \\
+\addlinespace
+W3 (May 31 -- Jun 6)& Progress Report 1                         & Complete    \\
+                    & Taxonomy $\rightarrow$ DPV Mapping -- 6 Domains & Not Started \\
+\addlinespace
+W4 (Jun 7 -- Jun 13)& Begin Analysis                            & Not Started \\
+                    & Taxonomy $\rightarrow$ DPV Mapping -- 6 Domains & Not Started \\
+                    & Report Scaffolding/Key Points             & In Progress \\
+\addlinespace
+W5 (Jun 14 -- Jun 20)& Progress Report 2                        & Not Started \\
+                    & Begin Compiling Analysis                  & Not Started \\
+                    & Report Draft -- All major points          & Not Started \\
+\addlinespace
+W6 (Jun 21 -- Jun 27)& Initial PoC for GitHub Pages Visualization & Not Started \\
+                    & Second Stage Analysis/Identify Issues     & Not Started \\
+                    & Create Appendix for offloading taxonomies.& Not Started \\
+\addlinespace
+W7 (Jun 28 -- Jul 4)& Progress Report 3                         & Not Started \\
+                    & Finalize Analysis                         & Not Started \\
+\addlinespace
+W8 (Jul 5 -- Jul 11)& All report sections have bulleted key points. & Not Started \\
+                    & Begin Final Presentation Outline/Slides   & Not Started \\
+\addlinespace
+W9 (Jul 12 -- Jun 18)& Progress Report 4                        & Not Started \\
+                    & Complete Final Presentation Slides        & Not Started \\
+                    & Record Final Video Presentation           & Not Started \\
+\addlinespace
+W10 (July 19 -- Jul 25)& Post Final Presentation Video (July 21)& Not Started \\
+\addlinespace
+W11 (Jul 26 -- Aug 2)& Finish Report Authoring                  & Not Started \\
+                    & Submit Final Report (Aug 2)               & Not Started \\
+\end{longtable}
+ 
+% =====================================================================
+\section*{Evaluation}
+ 
+I'm not quite to the point of defining the full evaluation approach,
+however, through the methodology planning I know the evaluation will be
+classed as a semantic conformance matching with follow-on qualitative
+issue analysis. The conformance matching is intended to surface latent
+ontological commitments, implementation points, and options, where I will
+endeavor to articulate their tradeoffs.
+ 
+% =====================================================================
+\section*{Report Outline}
+ 
+See the next page for the current outline, contained within the table of contents. I believe I'm a bit ahead on this at the current stage.
+
+
+\clearpage
+
+% ================= MAIN DOCUMENT =================
+
+% Restore normal page style (rho class defaults)
+\pagestyle{plain} % or whatever rho expects; remove if rho sets this itself
+
+% Switch back to two-column layout as specified by rho
+\twocolumn
+
+% From here on, everything uses the original rho-class
+% look and feel (9pt, letterpaper, twocolumn, twoside).
+
+% Your actual content starts here
+
+
 %----------------------------------------------------------
 % Title
 %----------------------------------------------------------
@@ -236,13 +526,13 @@ Generative AI was used in the completion in this work in the following ways.
 \section*{Appendices}
 \subsection*{Appendix A: Full Data Model}
 \clearpage
-\subsection*{Appendix B: Full Listing of Input Taxonomies}
+\subsection*{Appendix B: Full Listing of Input Taxonomies by Author Type Classification}
 \textbf{TODO:} Fix numbering issue on bibligography-split.
 \begin{refsection}
 \nocite{*}
 \subsubsection*{Independent Standards}
 \printbibliography[heading=none,filter=taxonomystandards]
-\subsubsection*{Regulatory}
+\subsubsection*{Governmental}
 \printbibliography[heading=none,filter=taxonomyregulatory]
 \subsubsection*{Commercial Tools}
 \printbibliography[heading=none,filter=taxonomycommercialtools]
