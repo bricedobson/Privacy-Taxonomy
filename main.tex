@@ -25,7 +25,7 @@
 Hi Dr. Kuerbis and anyone else who reads my progress report! 
 \\
 \\
-I hit a bit of a motivational wall with the coding of all the taxonomies to domains and subsequent analysis due to some combination of the detailed and monotonous nature of the work. As a result, I began working ahead in some areas to "break up" this work. I feel good with where I'm currently at and might even be slightly ahead, even if I'm deciding to leave a few tasks as not marked fully complete against my plan for this week. You will see this reflected on my timeline.
+I hit a bit of a motivational wall with the coding of all the taxonomies to domains and subsequent analysis due to some combination of the detailed and monotonous nature of the work. As a result, I began working ahead in some areas to "break up" this work and somewhere in there I realized I was out of taxonomies to code. I feel good with where I'm currently at and might even be slightly ahead, even if I'm deciding to leave a few tasks as not marked fully complete against my plan for this week. You will see all of this reflected on my timeline.
 \\
 \\
 For this second report and hopefully the remaining ones, you will see that I'm adding some additional structure and I've decided to include my full report draft a bit earlier than the course requires. This is the result of some reflection on Progress Report 1, where I spent more time than I'd have liked on compiling and summarizing work. I'm sure the first progress report ends up being the most time intensive, but you will see that in some sections within this progress report, I may link to or embed the current state of my draft report as long as the underlying content is sufficient in my view. This will help me manage the opportunity cost of doing a good job on the progress reports, forces me to do higher quality work within my final work product draft, and hopefully also demonstrates my actual work instead of some summary assertion.
@@ -92,22 +92,6 @@ created at the intersection of all the following conditions:
 \end{itemize}
 % =====================================================================
 \section*{Solution Statement}
- 
-This is a complex problem addressable only at the organization level that
-ultimately relies on responsible individuals implementing organizational
-data models with appropriate contextualization, there is no bypass of
-this. The approach represents a distillation of common
-structurally-grounded issues and considerations in an accessible place,
-with the hope that they may be more readily found and applied by
-practitioners. The idea is that there is value in the DPV as a framework
-to interconnect otherwise disparate domain taxonomies and a forced
-mapping of a high-quality subset of the hundreds of these would yield
-considerations, decision points, and conflicts that the DPV is largely
-silent on from the implementer perspective. Thus, if these are known and
-can be made explicit, errors in the application of data models can be
-reduced through planning and decision making during organizational
-implementations.
- 
 The deliverables are anticipated as follows:
  
 \begin{itemize}
@@ -126,23 +110,34 @@ The deliverables are anticipated as follows:
   pages explorer). Functionally, this will be the product of the
   compilation, technical abstraction, and analytical cross-mapping of
   existing ontologies, frameworks, taxonomies, and reference data
-  models/schemas. At this stage, I anticipate covering the entire DPV
-  but want to retain the privilege to ``deep dive'' into the most
-  impactful issue areas/areas with important and/or unclear decisions as
-  a function of effort required, timelines, and needed quality standards.
+  models/schemas.
 \end{itemize}
-
-This is starting to come together further in \hyperref[sec:1]{Introduction} and \hyperref[sec:2]{Background}
+\\
+\\
+This is a complex problem addressable only at the organization level that
+ultimately relies on responsible individuals implementing organizational
+data models with appropriate contextualization, there is no bypass of
+this. The approach represents a distillation of common
+structurally-grounded issues and considerations in an accessible place,
+with the hope that they may be more readily found and applied by
+practitioners. The idea is that there is value in the DPV as a framework
+to interconnect otherwise disparate domain taxonomies and a forced
+mapping of a high-quality subset of the hundreds of these would yield
+considerations, decision points, and conflicts that the DPV is largely
+silent on from the implementer perspective. Thus, if these are known and
+can be made explicit, errors in the application of data models can be
+reduced through planning and decision making during organizational
+implementations.
 % =====================================================================
 \section*{Completed Tasks (Last 2 Weeks)}
  
 \begin{itemize}
-  \item Preliminary outline of full report, you can see this within the table of contents below.
-  \item Completed identification of all input taxonomies, implemented an informal classification scheme based on utility to project.
-  \item All input taxonomies are now coded per the methodology.
+  \item Preliminary outline of full report, you can see this \hyperref[sec:1]{within the table of contents below}.
+  \item Completed identification of all input taxonomies, implemented an informal classification scheme based on authority and  utility. \hyperref[sec:b]{This is listed in Appendix B.}
+  \item All input taxonomies are now coded per the methodology. \hyperref[sec:c]{This is summarized in Appendix C.}
   \item   Finished all initial formatting for the draft final report via the LaTeX document created in the last period.
-  \item Developed and implemented "split" bibliographic approach that allows for separate references (inline within the report) vs. the listing of input taxonomies (listed within an appendix).
-  \item Regarding the analysis, I am near complete, the mapping has been performed and issued flagged, however, I have not finished documenting it within the paper and then transforming that into the various appendices. I need to do more experimentation on how to present this visually.
+  \item Developed and implemented "split" bibliographic approach that allows for separate references (inline within the report) vs. the listing of input taxonomies (listed within an appendix). You see this in the \hyperref[sec:b]{Appendix B} and \hyperref[sec:z]{References} page.
+  \item Regarding the analysis, I am near complete, the mapping has been performed and issues flagged, however, I have not finished documenting it within the paper and then transforming that into the appendix. I need to do more experimentation on how to present this visually.
 \end{itemize}
  
 % =====================================================================
@@ -167,19 +162,17 @@ This is starting to come together further in \hyperref[sec:1]{Introduction} and 
  
 At a high level, the methodology consists of the following milestones:
  
-\begin{itemize}
-  \item Identified logical domains of the DPV and explicitly defined boundaries between domains.
+\begin{enumerate}
+  \item Identify logical domains of the DPV and declare explicitly defined boundaries between domains.
   \item Identify taxonomies that relate to one or more of each DPV domain.
   \item Evaluate the taxonomies per domain to select around the top 3 for each domain, based on both authoritativeness and detail/completeness. Retain these, shed the rest.
   \item For each DPV domain; enumerate all data relationships implied through the top taxonomies.
   \item For each population of analysis within each domain; remove duplicates, reconcile conflicts, and normalize to at least a target normalization level.
   \item Highlight and explore root causes of conflicts and normalization issues. This becomes the content of the report.
   \item Document.
-\end{itemize}
- 
-% =====================================================================
+\end{enumerate}
+\clearpage
 \section*{Timeline}
- 
 \begin{longtable}{@{}>{\RaggedRight\arraybackslash}p{0.22\textwidth}
                      >{\RaggedRight\arraybackslash}p{0.55\textwidth}
                      >{\RaggedRight\arraybackslash}p{0.15\textwidth}@{}}
@@ -214,7 +207,7 @@ W4 (Jun 7 -- Jun 13)& Begin Analysis                            & In Progress \\
                     & Taxonomy $\rightarrow$ DPV Mapping -- 6 Domains & Complete \\
                     & Report Scaffolding/Key Points             & In Progress \\
 \addlinespace
-W5 (Jun 14 -- Jun 20)& Progress Report 2                        & Completed \\
+W5 (Jun 14 -- Jun 20)& Progress Report 2                        & Complete \\
                     & Begin Compiling Analysis                  & In Progress \\
                     & Report Draft -- All major points          & In Progress \\
 \addlinespace
@@ -240,15 +233,14 @@ W11 (Jul 26 -- Aug 2)& Finish Report Authoring                  & Not Started \\
  
 % =====================================================================
 \section*{Evaluation}
-Many folks seem to be working with a stakeholder feedback approach. I do not think this would be the best \textit{primary} approach given some of the constraints on this work, namely the highly-specific nature of the problem and the timing constraints of the course. In this, I am also reminded that both the input taxonomies as well as the DPV ontology are both subject to significant stakeholder feedback prior to publication, which is something that my work benefits from that my peer's projects may not. 
- \\\\
+Many folks seem to be working with a stakeholder feedback approach. I do not think this would be the best \textit{primary} approach given some of the constraints on this work, namely the highly-specific nature of the problem and the timing constraints of the course. In this, I am also reminded that both the input taxonomies as well as the DPV ontology are both subject to significant stakeholder feedback prior to publication, which is a privlige of this body of work that will benefit my own work in the space, my peers may not have the benefit of this for their projects.
+ \\
 I am presently exploring that there are two different "vantages" for the evaluation, which I am treating fundamentally a test of external validity. 
 \begin{enumerate}
     \item The validity of the mapping of taxonomies to the broader ontological structure.
     \item The validity of the findings and issues.
 \end{enumerate}
-\\Each of these will demand a different evaluation approach. In approaching further evaluation, I'm exploring the following techniques for the vantages, respectively.
-
+Each of these will require a different evaluation approach. In approaching further evaluation, I'm exploring the following techniques for the vantages, respectively.
 \begin{enumerate}
     \item A quantitative testing approach using either ontological tools (e.g. OWL Web Ontology Language Test Cases) OR potentially a synthetic dataset.
     \item Making Issues submissions to the W3C working group on the most significant findings, in an effort to both receive feedback AND make a contribution to the work.
@@ -257,11 +249,11 @@ I am presently exploring that there are two different "vantages" for the evaluat
 % =====================================================================
 \section*{Report Outline}
  
-See the \hyperref[sec:1]{Table of Contents} on the next page for the current outline, contained within the table of contents. I believe I'm a bit ahead on this at the current stage.
+See the \hyperref[sec:1]{Table of Contents} on the next page for the current outline. I believe I'm a bit ahead on this at the current stage and will work to have it fully fleshed by the next update.
 
 \section*{References}
 
-See \hyperref[sec:b]{Appendix B} and \hyperref[sec:references]{References}.
+See \hyperref[sec:b]{Appendix B} and \hyperref[sec:z]{References}.
 \clearpage
 
 % ================= MAIN DOCUMENT =================
@@ -353,6 +345,8 @@ See \hyperref[sec:b]{Appendix B} and \hyperref[sec:references]{References}.
 \label{sec:1}
 \rhostart{o}rganizations, especially larger ones with multi-jurisdictional privacy compliance imperatives, implicitly manage many seemingly disparate categories of privacy-relevant information. Examples include data flows and inventories, processes/activities, purposes and lawful bases, notices, consent records, invocation of individual rights, compliance and risk assessments, and more. Many taxonomies, frameworks, and operational models exist for individual privacy task domains (referred to here as subdomains). The most foundational of these is the World Wide Web Consortium (W3C) Data Privacy Vocabulary (DPV), but as an ontology fundamentally, it leaves significant room for misapplication by implementers who may fail to consider the latent data relationships that are required to be made explicit during operationalization. Luckily, there are hundreds of reference taxonomies for specific domains within data privacy published by academic researchers, international standards organizations, and implicitly within commercial products. While these often have higher normalization and robustness due to their necessity for applied use, interoperability in adjacent processes is almost never addressed within these but remains an eventuality organizations must face as they seek to improve maturity, where these organizations design and operate internal controls within these privacy domains in their efforts to comply with increasingly stringent and detailed legal requirements. Ultimately, this is a problem of semantic compatibility and inadequate contextualization with increase of scope, where disconnected taxonomies produce inconsistent terminology and data, duplication without clear authority, and unrecognized or unclear relationships. 
 \\
+\\
+\\
 As a result, organizations meeting this profile often rely on the subsequent data to draw conclusions in contexts where that data is not sufficiently precise, normalized, or complete for the purpose. This creates both operational and legal compliance challenges such as exceeding purpose specification which erodes lawful bases of processing, inadequate recognition and fulfillment of individual rights, and missed opportunity through poor application of legal requirements.
 \\
 Altogether, this highlights a condition faced by almost all large organizations in this space today, where the volume and importance of privacy-relevant data is increasing based on external growth and internal investment within the domain, but there is an industry-wide maturity gap where fragmented and tool-bound processes lead to fragmented data faster than organizations can normalize the data relationships to make control capabilities legally reliable and defensible. In summary, the problem is created at the intersection of all the following conditions:
@@ -434,10 +428,10 @@ The DPV, as an ontology, does not consider object attributes, typing, or keys. A
     Input taxonomies were identified through targeted searches of published independent standards, academic papers, as implemented in commercial tools within that specific subdomain. For each subdomain, a target of the three highest quality taxonomies was sought. Quality was evaluated relatively as a function of breadth, or number of topics within the subdomain explicitly accounted for, and readiness for implementation, that is, the apparent presence and completeness of likely required attributes like relevant typing, attribute-key relationships, and consideration for operationally relevant metadata.
 \subsection{Identifying Data Relationships within the Taxonomies}
     Working by subdomain, each taxonomy was coded with the internal (within the subdomain) and external (beyond the subdomain) relationship(s) implied through its content. Small semantic differences were reconciled, de-duplication was applied, and testing was performed to ensure a consistent level of normalization (TODO: confirm this level) had been applied to internal data structures.
-\subsection{Testing and Evaluation}
+\subsection{Measurement and Evaluation}
     Tables and attributes were defined.
     
-\section{Observations and Analysis}
+\section{Analysis and Observation}
 \subsection{Prerequisite Definitions}
     Key Points for this Section
     \begin{enumerate}
@@ -474,15 +468,14 @@ The DPV, as an ontology, does not consider object attributes, typing, or keys. A
         \item Key Point 3
     \end{enumerate}
 \subsection{Internal Hierarchies}
-There are at least three heirarchcies that every orgznization meeting the profile experiences, that are not contemplated by the DPV.  1) (Business) Process 2) Supervision 3) Geographic and a likely 4th that shares tight but not complete alignemnt is beneficial ownership/affiliate companies.  Almost all privacy dat problems are the result of the intersection of these issues.
+There are at least three heirarchcies that every orgznization meeting the profile must decide that are not contemplated by the DPV.  1) (Business) Process 2) Supervision 3) Geographic and a likely 4th that shares tight but not complete alignemnt is beneficial ownership/affiliate organizations. Almost all privacy data integrity problems seem to be the result of the intersection of these issues.
 
-\section{Measurement}
-
-\section{Proposed Solution}
+\section{A Proposed Approach}
     This is a complex problem addressable only at the organization level that ultimately relies on responsible individuals implementing organizational data models with appropriate contextualization, there is no bypass of this. The approach represents a distillation of common structurally-grounded issues and considerations in an accessible place, with the hope that they may be more readily found and applied by practitioners. The idea is that there is value in the DPV as a framework to interconnect otherwise disparate domain taxonomies and a forced mapping of a high-quality subset of the hundreds of these would yield considerations, decision points, and conflicts that the DPV is largely silent on from the implementer perspective. Thus, if these are known and can be made explicit, errors in the application of data models can be reduced through planning and decision making during organizational implementations.
-    
-\section{Evaluation}
-        Why not get stakeholder feedback at this stage? This initial work seeds <dozens> of high-quality taxonomies, each of which has been validated by varying degrees of stakeholder feedback by virtue of becoming high-quality. This is too specific to request feedback in generalities; rather, when feedback is eventually sought, it should be the product of rigorous testing. Further, the subject of the evaluation should really be the identified considerations, decision points, and issues surfaced from the analysis.
+\subsection{A Reference Data Model}
+\subsection{Support for Maturity Target Changes}
+\subsection{Evaluation}
+        Notes: Why not get stakeholder feedback at this stage? This initial work seeds <dozens> of high-quality taxonomies, each of which has been validated by varying degrees of stakeholder feedback by virtue of becoming high-quality. This is too specific to request feedback in generalities; rather, when feedback is eventually sought, it should be the product of rigorous testing. Further, the subject of the evaluation should really be the identified considerations, decision points, and issues surfaced from the analysis.
         
         Use Commercial Tools.
 
@@ -498,13 +491,12 @@ There are at least three heirarchcies that every orgznization meeting the profil
 \section{Conclusions}
 
 \section*{Acknowledgments}
- This document was compiled using \href{https://github.com/MemoJimenez/Rho-class}{Rho-class}, a \LaTeX{} template developed by Guillermo Jimenez.
 \subsection*{GitHub Repository}
     Visit the repository to access the source code, track ongoing development, report issues, and stay up to date with the latest changes.
     \begin{center}
         \setlength{\tabcolsep}{3pt}
         \begin{tabular}{cl}
-             \faGithub &  \url{https://github.com/MemoJimenez/Rho-class}\\
+             \faGithub &  \url{https://github.com/bricedobson/Privacy-Taxonomy}\\
         \end{tabular}
     \end{center}
 \subsection*{AI Use Disclosures}
@@ -514,11 +506,13 @@ Generative AI was used in the completion in this work in the following ways.
     \item Formatting support with \LaTeX and BibTeX
     \item Transforming the analysis schema to a format compatible with the web-based explorer.
 \end{itemize}
+\subsection*{Template}
+ This document was compiled using \href{https://github.com/MemoJimenez/Rho-class}{Rho-class}, a \LaTeX{} template developed by Guillermo Jimenez.
 \onecolumn
-\section*{Appendices}
+\section{Appendices}
 \subsection*{Appendix A: Full Data Model}
 \clearpage
-\subsection*{Appendix B: Full Listing of Input Taxonomies by Author Type Classification}
+\subsection{Appendix B: Full Listing of Input Taxonomies by Author Type Classification}
 \label{sec:b}
 \textbf{TODO:} Fix numbering issue on bibligography-split.
 \begin{refsection}
@@ -533,23 +527,89 @@ Generative AI was used in the completion in this work in the following ways.
 \printbibliography[heading=none,filter=taxonomyacademicwork]
 \end{refsection}
 \clearpage
-\subsection*{Appendix C: Mapping of Taxonomies to Domains}
+\subsection{Appendix C: Mapping of Taxonomies to Domains}
+\begin{longtable}{@{}p{0.28\linewidth} p{0.68\linewidth}@{}}
+\caption{Input taxonomies mapped to the twelve capability-area domains of the reference model, based on the DPV.\\ \textbf{TODO:} Fix the numbering issue with the references}%
+\label{sec:c}\\
+\toprule
+\textbf{Capability-area domain} & \textbf{Input taxonomies}\\
+\midrule
+\endfirsthead
+\multicolumn{2}{@{}l}{\textit{Table~\ref{tab:taxonomy-domain-map} (continued)}}\\
+\toprule
+\textbf{Sub-Domain Process Area} & \textbf{Input taxonomies}\\
+\midrule
+\endhead
+\midrule
+\multicolumn{2}{r@{}}{\textit{(continued on next page)}}\\
+\endfoot
+\bottomrule
+\endlastfoot
+
+\#1 Processing Inventory &
+\cite{gdpr,dpv,iso27701,iso29100,iso15489,nistprivacyframework11ipd,cnilropa,dpcat,ccpacpra,bigid_api_overview,onetrust_api_reference,securiti_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#2 Purpose Specification \& Governance &
+\cite{gdpr,dpv,wp203,iso19944part1,iso19944part2,iabtcf,ccpacpra,pipl,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#3 Personal Data Inventory \& Classification &
+\cite{gdpr,dpv,iso29100,iso19944part1,iso19944part2,nistprivacyframework11ipd,enterprivacycategories,cronkspbd,ccpacpra,lgpd,pipl,bigid_api_overview,onetrust_api_reference,securiti_api_reference}\\
+\addlinespace
+
+\#4 Legal Basis Management &
+\cite{gdpr,dpv,iso27701,ccpacpra,lgpd,pipl,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#5 Entities, Roles \& Accountability &
+\cite{gdpr,dpv,iso27701,iso29100,ccpacpra,lgpd,pipl,dora,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#6 Consent Management &
+\cite{gdpr,dpv,iso27560,iso29184,kantaracr,ieee7012,iabtcf,gpc,adpc,eprivacydirective,dga,ccpacpra,datagrail_api_v2_reference,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#7 Data Subject Rights Management &
+\cite{gdpr,dpv,edpberasure2026,ccpacpra,lgpd,pipl,datagrail_api_v2_reference,onetrust_api_reference,securiti_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#8 Notice \& Transparency &
+\cite{gdpr,dpv,wp260,iso29184,ieee7012,gpc,adpc,eprivacydirective,ccpacpra,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#9 Risk \& Impact Assessment (DPIA/PIA) &
+\cite{gdpr,dpv,iso27005,iso31000,nistir8062,nistpram,nistprivacyframework11ipd,linddun,cnilpia,cnilpiasoftware,icodpia,owaspprivacy,enisathreattaxonomy,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+\addlinespace
+
+\#10 Technical \& Organisational Measures &
+\cite{gdpr,dpv,iso27701,nistoscal,nistprivacyframework11ipd,enisanis2guidance,owaspprivacy,onetrust_api_reference,securiti_api_reference}\\
+\addlinespace
+
+\#11 Incident \& Breach Management &
+\cite{gdpr,dpv,eprivacydirective,dga,dora,doraits302,nistprivacyframework11ipd,enisathreattaxonomy,enisanis2guidance,nis2templates,onetrust_api_reference}\\
+\addlinespace
+
+\#12 Regulatory Reporting \& Disclosure &
+\cite{gdpr,dpv,dpcat,nistoscal,cnilropa,doraits302,nis2templates,dora,dga,onetrust_api_reference,trustarc_gateway_api_developers_guide}\\
+
+\end{longtable}
+
 \clearpage
 \subsection*{Appendix D: Taxonomy Extracted Data Relationships by Domain}
 \clearpage
-\subsection*{Appendix E:Summary Analysis Statistics}
+\subsection*{Appendix E: Summary Analysis Statistics}
 \clearpage
-\section*{References}
-
+\section{References}
+\label{sec:z}
 %----------------------------------------------------------
 
 \textbf{TODO:} Define citation and reference style, currently set as IEEE with citestyle=numeric-comp 
 \newline
 \newline
-\textbf{A quick note on references at this stage:} The core work of this entire project is about identifying references, extracting a very small piece of information (the implied data relationship(s)), and aggregating and normalizing these pieces. I have reached the point where I have a "split" set of references. This list contains only the references cited in the body of the paper, excluding appendices. I do expect several more references here, but separately, you will see a substantial number of references within Appendix B, where those references merely provided inputs to the analysis effort.
+\textbf{A quick note on references at this stage:} The core work of this entire project is about identifying references, extracting a very small piece of information (the implied data relationship(s)), and aggregating and normalizing these pieces. I have reached the point where I have a "split" set of references. This list contains only the references cited in the body of the paper, excluding appendices. I do expect several more references here, but separately, you will see a substantial number of references within Appendix B, where those references merely provided inputs to the analysis effort. Additionally, references will only show up here once they're cited in the document, check the .bib file for the full references.
 \printbibliography[filter=referencesonly
 ]
-\label{sec:references}
 %----------------------------------------------------------
 
 \end{document}
