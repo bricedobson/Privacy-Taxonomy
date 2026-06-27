@@ -410,6 +410,566 @@ While there are certainly others who may draw value from this work in smaller pi
     Within large organizations, privacy-related spending appears to be accelerating with the share of these globally spending more than \$5 million USD on privacy increasing from 14\% to 38\%, or approximately 171\% growth\cite{IAPP2024Gov}. In parallel, 93\% of organizations who have at least one dedicated privacy professional, a superset of large organizations, reported plans to increase privacy and data governance investment over the next two years, and 80\% of chief privacy officers report responsibility for at least one privacy-adjacent domain such as data governance, responsible A.I., or platform liability\cite{IAPP2024Gov}.
 
 \section{Methodology}
+The Reference Data Model was produced through a phased approach where each phase delivered an input to the subsequent phase. This allowed for phases to increase abstraction over the project and mitigated risks that would have arisen from premature optimization.
+
+\textbf{TODO:} Add table with phases and outputs.
+
+\subsection{Approach}
+
+
+%\subsubsection{Source-traceability and citation discipline}
+
+%\begin{itemize}
+    %\item \textbf{Claim.} Every entity, relationship, and decision in the model traces back to one or more named sources, and each source is identified per occurrence rather than acknowledged in aggregate.
+   % \item \textbf{Warrant.} A maturity-uplift programme has to be able to cost the rework involved in raising a target (per~D4, ``moving a CMMI~3$\to$4 target is a large data-relationship rework that must be estimable''); an untraceable model offers no basis for that estimate. Per-occurrence attribution also supports audit defensibility and lets future contributors extend the model without re-deriving its provenance.
+  %  \item \textbf{Evidence.} Per-source DPV-coverage matrices appear in every Phase~3 domain file; 578 implied relationships in \texttt{Appendix~--~Implied Data Relationships.tex} carry an explicit \emph{Source} column; 405 consolidated issues in \texttt{Appendix~--~Identified Issues.tex} retain their originating source on consolidation rather than collapsing to anonymous gap entries.
+ %   \item \textbf{Implications.} Practitioners extending the model for additional regulations or sectoral overlays should preserve per-source attribution rather than describing extensions in summary form; the discipline is what makes the rework cost of a regulatory change estimable rather than discovered.
+%\end{itemize}
+
+\subsection{Defining the scope and gathering the sources}
+
+\subsubsection{Identifying the thirteen program-area domains}
+The model leans heavily on the DPV's module structure to define its sub-domains representing the process areas within a privacy program in a target organization. However, merely decomposing the DPV's module structure would have left common operational processes and artifacts without a home; including but not limited to Notice, Incident, and Regulatory Filing, as these are not first-class DPV modules. This resulted in a thirteen domain structure. 
+\newline
+\textbf{TODO: Determine if a table needs to go in here for the domains}
+
+%\subsubsection{Deciding the depth of modeling per domain}
+
+%\begin{itemize}
+ %   \item \textbf{Claim.} Each of the thirteen domains was assigned a qualitative modeling depth --- deeply modelled, lightly modelled, or interface-only --- rather than treated uniformly.
+  %  \item \textbf{Warrant.} Modelling depth tracks the density of Tier~1 prior art available for the domain. Where prior art is thin (e.g., Technology/AI Governance under a still-stabilising regulatory landscape) deep modelling would substitute internal speculation for sourced evidence and degrade the traceability commitment.
+   % \item \textbf{Evidence.} Nine deeply modelled domains (Processing Inventory, Purpose, Personal Data, Legal Basis, Entities/Roles, Consent, Rights, Risk/DPIA, TOM/Controls); three lightly modelled (Notice, Incident, Regulatory Reporting per~D9); one interface-only (Technology/AI Governance). Tier assignments recorded in the Charter scoping ledger and reflected in the per-domain Source Register entries.
+    %\item \textbf{Implications.} Practitioners should expect modelling depth to track prior-art density rather than perceived organisational importance; in lightly modelled or interface-only domains, an organisation will need to originate more structure internally and should budget the corresponding effort.
+%\end{itemize}
+
+\subsubsection{Delineating between what the DPV already provides and where it stops}
+Before extraction from input taxonomies could occur, the DPV was examined as if it were schema-complete to surface missing entities, attributes, and relationships that had the potential to be a source of structural ambiguity. This resulted in eight categorical gaps being made explicit for the purpose of the next phases.
+
+\textbf{TODO:} Insert table or list with gaps G1-G8.
+
+It is important to acknowledge that these are not asserted to be flaws in the DPV; rather, they are issues largely implicit to the application of ontologies in a discrete manner. However, disregarding any one of these eight gaps during an implementation is guaranteed to result in an under developed data model leading to functional issues as these reflect structural choices.
+
+\subsubsection{Identifying authoritative sources per domain and scoring them by tier}
+
+Input taxonomies (sources) were identified through research targeted at subdomain/author-type pairs. The author-typing asserted that credible authors of sources coudl be classed into four potential groups:
+\begin{enumerate}
+    \item Independent Standards Organizations
+    \item Governmental or Regulatory Institutions
+    \item Commercial Organizations
+    \item Academic Institutions
+\end{enumerate}
+
+For each subdomain/author-type pair, searches to identify input taxonomies were conducted using keywords (e.g. "taxonomy", "ontology", "classification system") through internet search engines and bibliographic databases.
+
+Identified sources were coded by their relevant subdomain(s) where they were suspected to imply relevant data entities, attributes, and relationships. Each source was further scored using a three-tier system for its domain relevance, level of authority, and potential yield to the data structures of the reference model. Some input taxonomies were eliminated at this point for; 1) having low potential yield due to low quality or no data structure implications through lack of detail, or 2) as summarization of another more authoritative source of identical information.
+
+\subsection{Extracting structure from each source}
+
+%\subsubsection{Per-source DPV-coverage matrices}
+
+%\begin{itemize}
+ %   \item \textbf{Claim.} Before any structural extraction, each source within each domain was mapped against the DPV module surface to identify what the source adds, restates, conflicts with, or omits.
+  %  \item \textbf{Warrant.} A source that overlaps DPV at the concept level may still contribute structurally through cardinality constraints, lifecycle stages, or mandatory-field obligations that the vocabulary leaves unspecified. The matrix prevents extractions from recapitulating DPV concepts under new names and instead surfaces the source's distinct contribution.
+   % \item \textbf{Evidence.} Per-source DPV-coverage matrices appear in every Phase~3 domain file (\texttt{03-analysis/01-13~*.md}); the cross-domain synthesis aggregates matrix findings into approximately 95 distinct DPV gaps.
+    %\item \textbf{Implications.} An organisation extending the model with new sources should produce the matrix first; subsequent gap identification and contribution-candidate selection rest on it. Skipping the matrix produces extractions that inflate the model with concept restatements while missing the source's actual structural yield.
+%\end{itemize}
+
+\subsubsection{Enumerating the entities, attributes, and relationships each source implies}
+Each source was analyzed for the entities, attributes, relationships, states, and cardinality constraints it explicitly stated. Many sources, especially those provided as regulatory guidance, stop short of explicitly declaring data-structure requirements directly but may proxy these through use-case specific taxonomies, examples, templates, or written content. Where these implicit items could be deduced, they were captured based on the entities they implicated. In total, there were 578 unique relationships implied and <TODO> entities.
+
+\subsubsection{Consolidating sources within each program area}
+The per-source extractions were then synthesized within subdomains into a single subdomain model prior to any cross-subdomain joins being mapped. Where cross-subdomain relationships were obvious or implied, these were place held. Where disagreements between two or more entries were identified, these were resolved within the subdomain. Decisions related to duplication, disagreements, and cardinality were noted for each entry. 
+
+\subsubsection{Synthesizing across program areas}
+Upon completion of entity-relationship mapping within subdomains, cross-subdomain joins were started using the DPV module relationships as a foundation. Placeheld work items identified from individual subdomain views were then reconciled. This highlighted some "messy middle" artifacts that play pivotal roles in operationalizing data privacy within an organization but either lack a home or near-evenly span multiple process subdomains. A common theme across many of these were that they were instantiated, so each instance may appear as a subdomain-local entity until forced to confront cross-subdomain joins. Examples of these include but are not limited to AccountabilityArtefact}
+
+\begin{itemize}
+    \item \textbf{Claim.} A cross-domain synthesis identified inter-domain joins, consolidated gaps and decisions across the per-domain models, and surfaced concepts that resisted single-domain ownership.
+    \item \textbf{Warrant.} Some structural patterns become legible only at the cross-domain view: an accountability artefact, a notice record, or an impact assessment recurs across many domains, but each instance looks like a domain-local entity until they are placed side-by-side. Per-domain analysis alone cannot recover the shared parent; it has to be looked for deliberately.
+    \item \textbf{Evidence.} The Cross-Domain Synthesis at \texttt{03-analysis/00 Cross-Domain Synthesis.md} (approximately 1{,}782 lines) catalogues 87 inter-domain joins (J1--J87), approximately 95 consolidated DPV gaps, and approximately 85 decision points. Three emergent unifying classes were identified at this stage: \texttt{AccountabilityArtefact} (spanning 23 typed document subtypes), \texttt{Notice}, and \texttt{ImpactAssessment}.
+    \item \textbf{Implications.} Practitioners building integrated privacy data architectures need to run a deliberate cross-domain pass after per-domain analysis stabilises. Abstract unifying classes cannot be recovered after the fact without re-traversing the domains.
+\end{itemize}
+
+\subsection{Building the model}
+
+\subsubsection{Separating the stable core from the optional layers around it}
+
+\begin{itemize}
+    \item \textbf{Claim.} The model partitions structure into a stable core that holds across all adopting programs and optional layers that depend on regulation, maturity, or risk tolerance.
+    \item \textbf{Warrant.} Treating everything as core forces every adopting program to carry regulation-specific and maturity-keyed obligations regardless of relevance; treating everything as periphery loses the invariants that make multi-regime composition possible. The partition is what lets a single-jurisdiction L2 program grow into a multi-regime L4 program without re-touching the core.
+    \item \textbf{Evidence.} The partition is implemented across four normalisation artifacts: \texttt{04-model/4A Core Spine.md} (34~core entities, 65~core relationships, 12~reified associations), \texttt{4A.5 Regulation Profiles.md}, \texttt{4B Maturity-Gated Periphery.md} (9~universal periphery structures), and \texttt{4C Risk-Discretionary Periphery.md} (40~R4C~decisions).
+    \item \textbf{Implications.} An organisation implementing the model can adopt the core first and add overlays incrementally as scope expands. The partition supports growth without re-architecture, but only if the partition is respected; ad-hoc additions to the core defeat the design.
+\end{itemize}
+
+\subsubsection{Keeping the core regulation-agnostic and attaching regulations as overlays}
+
+\begin{itemize}
+    \item \textbf{Claim.} The core was held strictly regulation-agnostic; regulation-specific obligations attach as profile overlays rather than living inside core entities.
+    \item \textbf{Warrant.} A core that bakes in any single regulation --- most commonly the GDPR, given DPV's origins --- privileges that regime structurally and forces compositional contortions when other regimes are added. The overlay mechanism preserves composability because no single regime sits in the core's design.
+    \item \textbf{Evidence.} Charter principle P7 and decision D11 (regulation-agnostic core, added during Phase~3 wrap-up); four full profiles (\texttt{eu-gdpr}, \texttt{us-ca-ccpa}, \texttt{br-lgpd}, \texttt{in-dpdpa}) and four sectoral skeletons (\texttt{us-hipaa}, \texttt{us-glba}, \texttt{us-fcra}, \texttt{us-coppa}) in \texttt{04-model/4A.5 Regulation Profiles.md}; a worked multi-regime US/EU SaaS composition example accompanies the profile catalogue.
+    \item \textbf{Implications.} Implementers should resist the temptation to add regulation-specific fields directly to core entities. The overlay layer is the structural mechanism that absorbs scope expansion as the organisation enters new jurisdictions, and bypassing it for convenience reproduces the regime-coupling problem the partition exists to prevent.
+\end{itemize}
+
+\subsubsection{Layering structure that only appears at higher maturity levels}
+
+\begin{itemize}
+    \item \textbf{Claim.} Structures that exist only at higher CMMI maturity levels --- versioning, immutable history, temporal validity, edge provenance, attestation --- are kept in a maturity-gated periphery layer rather than embedded in core entities.
+    \item \textbf{Warrant.} Embedding maturity-keyed structure in the core would force every L2 program to operate L4 commitments it has no process to support. Isolating maturity-keyed structure lets the same logical model instantiate cleanly at any target level, and lets advancement be planned as periphery additions rather than core rewrites.
+    \item \textbf{Evidence.} Nine universal periphery structures catalogued in \texttt{04-model/4B Maturity-Gated Periphery.md}; 42~documented L3~$\to$~L4 rework points in~\S6 of the same file; per-domain maturity layers L1--L5 published in \texttt{4E Maturity Delta Map.md} as the practitioner-facing artefact.
+    \item \textbf{Implications.} Organisations advancing maturity should expect to add periphery structures in a known sequence rather than discovering them at audit. The layered design allows investment to be planned against a published delta map rather than reverse-engineered from program failures.
+\end{itemize}
+
+\subsubsection{Cataloguing the layers that depend on the organisation's risk tolerance}
+
+\begin{itemize}
+    \item \textbf{Claim.} Decisions whose resolution depends on organisational risk tolerance --- not on regulation, not on maturity --- are catalogued as a discretionary periphery rather than resolved authoritatively in the model.
+    \item \textbf{Warrant.} Resolving these decisions in the model would impose a single risk posture on every adopting organisation. Cataloguing them surfaces each decision to organisational risk officers as an explicit choice with stated trade-offs, rather than burying it as a default the model selected on the organisation's behalf.
+    \item \textbf{Evidence.} Forty risk-discretionary decisions (R4C-01 through R4C-40) in \texttt{04-model/4C Risk-Discretionary Periphery.md}. The single largest decision is R4C-12 (Technical~/~Organisational~/~Legal~/~Physical as class hierarchy versus attribute facet), which derives from the four control-theme axis of ISO/IEC~27002:2022.
+    \item \textbf{Implications.} A program adopting the model should resolve each R4C decision against its risk posture as a deliberate step. Treating the catalogue as a set of defaults reproduces, internally, the silent-resolution problem the model identifies in commercial tooling.
+\end{itemize}
+
+\subsection{Verification}
+
+\subsubsection{Consistency audit}
+
+\begin{itemize}
+    \item \textbf{Claim.} A consistency audit at the close of Phase~4 verified entity codes, relationship codes, cross-references, and profile flags across the full body of normalised material.
+    \item \textbf{Warrant.} Cross-references that resolve at draft time can drift as consolidation progresses. Without an audit, the deliverables built on top of the normalised model --- the reference specification, the machine-readable artifacts, the interactive explorer --- would inherit silent inconsistencies and propagate them to every implementer that touches them.
+    \item \textbf{Evidence.} Verification is recorded in \texttt{04-model/4Z Verification and Navigation Index.md}. All seven consistency dimensions returned PASS. Three minor naming-convention drifts were noted for cosmetic harmonisation and did not block downstream publication.
+    \item \textbf{Implications.} A practitioner-maintained model should run the same audit at each integration milestone. The audit is itself an auditable artefact and is what allows the source-traceability commitment to be defended against later challenge.
+\end{itemize}
+
+\subsubsection{Charter-principle adherence checks}
+
+\begin{itemize}
+    \item \textbf{Claim.} The audit also verified that each Charter principle (P1 through~P7) holds in the assembled model, not only that internal references resolve.
+    \item \textbf{Warrant.} Cross-reference consistency is necessary but not sufficient. A model can be internally coherent while violating its own founding principles, and the regulation-agnostic principle (P7) is particularly easy to violate silently: a sectoral overlay can satisfy every cross-reference check while inadvertently coupling a core entity to overlay-only attributes.
+    \item \textbf{Evidence.} P1--P7 adherence is recorded in \texttt{04-model/4Z Verification and Navigation Index.md}; all principles reported as holding. The eight DPV foundational gaps (G1--G8) are reported as fully covered by the periphery and discretionary catalogues rather than left implicit.
+    \item \textbf{Implications.} Future extensions of the model should re-run the principle check, not only the reference check. A reference-clean sectoral overlay that violates P7 is structurally worse than an inconsistent draft, because the violation is harder to detect once the model has been published.
+\end{itemize}
+
+% =====================================================================
+
+\section{Analysis and Observations}
+
+\subsection{What operating a privacy program actually requires}
+
+\subsubsection{The structure needed for implementation far exceeds the vocabulary}
+
+\begin{itemize}
+    \item \textbf{Observation.} The structural surface required to operate a privacy program is substantially larger than DPV's controlled vocabulary; sitting down to implement against DPV alone leaves most data-structure questions open.
+    \item \textbf{Mechanism.} DPV is scoped as a controlled vocabulary, not a schema. It publishes concept schemes with a deliberate hand-off (``can additionally be implemented~\ldots~appropriate to a use-case's specific requirements''), leaving cardinality, identity, lifecycle, and other structural commitments to the implementing layer below.
+    \item \textbf{Manifestation.} The reference model's published surface --- 34 core entities, 65 core relationships, 12 reified-association classes, 51 per-domain entities, 37 per-domain relationships, 87 cross-domain joins, and four full plus four sectoral-skeleton regulation profiles across approximately 14{,}000 lines of normalised material --- exceeds DPV's published surface by an order of magnitude.
+    \item \textbf{Consequence.} Implementers should not treat DPV adoption as sufficient for operating a privacy program. The implementation-layer commitment can be inherited from this reference model or originated internally, but it cannot be skipped; programs that try produce the most common failure mode of ``we adopted DPV and still don't have an operating data model.''
+\end{itemize}
+
+\subsubsection{Some program areas have heavy prior art; others have almost none}
+
+\begin{itemize}
+    \item \textbf{Observation.} When inventoried per domain, the density of authoritative prior art varies by an order of magnitude across capability areas.
+    \item \textbf{Mechanism.} Regulator attention and standards-body output have concentrated on some areas (DPIA methodology, security controls, consent records) and not others (transparency notices, breach handling, technology and AI governance under a still-stabilising regulatory landscape). Where prior art is thin, sourced extraction returns less material.
+    \item \textbf{Manifestation.} Per-domain issue counts range from 6 in Technology/AI Governance (interface-only) to 67 in Entities, Roles and Accountability. The consolidated issues register holds 405 distinct items distributed unevenly across the thirteen domains, and the asymmetry tracks the prior-art density rather than the perceived organisational importance of each domain.
+    \item \textbf{Consequence.} Implementers should expect different domains to require different mixes of source-driven adoption versus internal origination. Lightly-modelled and interface-only domains will need more in-house data-architecture work than their perceived importance suggests, and this affects team composition, vendor evaluation, and where architectural review effort should concentrate.
+\end{itemize}
+
+\subsubsection{Authoritative sources disagree often enough to be worth measuring}
+
+\begin{itemize}
+    \item \textbf{Observation.} Even among Tier~1 sources within a single domain, disagreement on cardinality, lifecycle, primary-entity choice, and role-naming convention is the rule rather than the exception.
+    \item \textbf{Mechanism.} Each source was authored to satisfy its own scope --- a regulation, a standard, a regulator guidance document --- and reconciliation across sources was no one's responsibility before this work. Disagreements that look like ambiguity from a single source's vantage point reveal as substantive structural conflict when sources are placed side by side.
+    \item \textbf{Manifestation.} 103 documented source disagreements were captured in the consolidated issues register. Many trace to a smaller set of recurring structural choices: primary-entity selection, categories vs instances, granularity, reification depth, role-as-type vs role-as-relation, and theme-as-type vs theme-as-attribute.
+    \item \textbf{Consequence.} A privacy program that adopts multiple sources without an explicit reconciliation step inherits these disagreements as latent inconsistencies. The reconciliation work has to happen somewhere; doing it during architecture is materially cheaper than discovering it during audit.
+\end{itemize}
+
+\subsection{Privacy regulations are doing the same thing in different words}
+
+\subsubsection{Every regulation effectively re-instantiates the same operational backbone}
+
+\begin{itemize}
+    \item \textbf{Observation.} Across GDPR, CCPA/CPRA, LGPD, and DPDPA, the same operational backbone appears under regime-specific vocabularies.
+    \item \textbf{Mechanism.} Each regulation encodes the same underlying operational reality --- who is processing which data, for what purpose, under which legal authority --- and divergence reflects the cultural and political framing of each regime rather than substantively different structure.
+    \item \textbf{Manifestation.} Five invariant classes (\texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, \texttt{PartyRoleInActivity}) appear in every conformant implementation, at every CMMI level, under every supported profile. The regulation-agnostic core consolidates the backbone explicitly; the four published profiles attach their regime-specific structure as overlays without disturbing it.
+    \item \textbf{Consequence.} A program building for a single regulation should architect the backbone first and treat the regulation as an overlay. Doing so creates a foundation that absorbs additional regimes without re-architecture; doing the reverse forces structural rework when a US-only program expands into EU operations or a second sectoral overlay is added.
+\end{itemize}
+
+\subsubsection{What's truly invariant is smaller than the regulations imply}
+
+\begin{itemize}
+    \item \textbf{Observation.} Reading any single regulation suggests that every requirement is structurally mandatory; comparison across regimes shows only a small portion of the structural surface is actually invariant.
+    \item \textbf{Mechanism.} Regulations bundle structural requirements (entities, relationships, cardinality) with regime-specific mandatory field names, templates, and enumerations. Routing the regime-specific portion to overlays leaves a backbone that turns out to be substantially smaller than any single regulation reads as requiring.
+    \item \textbf{Manifestation.} GDPR Art.~30 mandatory-field overlays attach as profile-level structure rather than core entities. The same applies to CCPA/CPRA disclosure templates, LGPD ANPD notification fields, and DPDPA fiduciary-specific obligations. The core remains 34 entities and 65 relationships across all profiles.
+    \item \textbf{Consequence.} Implementers can build a program that absorbs additional regulatory regimes without re-architecture provided the regime-specific structure is held strictly in the overlay layer. This is the single architectural decision most determinative of multi-regime extensibility, and the most commonly violated one in practice.
+\end{itemize}
+
+\subsubsection{Operating under multiple regulations is composition, not reconciliation}
+
+\begin{itemize}
+    \item \textbf{Observation.} When a single processing activity falls under multiple regulatory regimes, the structural answer is composition (the union of regime obligations) rather than reconciliation (choosing one regime's structure as primary).
+    \item \textbf{Mechanism.} Because the core is regulation-agnostic and each regime attaches as a profile overlay, multi-regime processing is supported by composing overlays rather than picking a winner. Conflicts (e.g., divergent retention requirements) surface as decisions to be made explicitly rather than as silently-resolved precedence rules.
+    \item \textbf{Manifestation.} The regulation-profile mechanism supports concurrent attachment of multiple profiles to a single activity. A worked example in \texttt{4A.5} walks through a US/EU SaaS processing activity under both \texttt{eu-gdpr} and \texttt{us-ca-ccpa}, showing how the union of mandatory fields composes without forcing regime selection.
+    \item \textbf{Consequence.} Organisations with cross-jurisdictional processing should resist tooling that demands a single regulatory classification per activity. Tools that force regime selection at the activity level lose the structural composition the model preserves and force false reconciliation that the regulations themselves do not require.
+\end{itemize}
+
+\subsection{The work that doesn't belong to any one program area}
+
+\subsubsection{Accountability, notice, and impact assessment cut across the whole program}
+
+\begin{itemize}
+    \item \textbf{Observation.} Several structural concerns refuse to sit cleanly inside any single capability area, appearing instead across multiple domains in subtly different forms.
+    \item \textbf{Mechanism.} Documents and assessments produced for accountability, notice, and impact-assessment purposes serve cross-domain functions (audit trail, transparency, risk evidence) but are physically generated within the domain that triggered them. Per-domain analysis treats each occurrence as a domain-local entity; only the cross-domain view reveals the shared parent.
+    \item \textbf{Manifestation.} Three emergent unifying classes surfaced at cross-domain synthesis: \texttt{AccountabilityArtefact} (abstract parent of 23 typed document subtypes including DPAs, joint-controller arrangements, sub-processor authorisations, SoAs, and consent records); \texttt{Notice} (thin abstract parent with concrete subtypes co-owned by their triggering domain); \texttt{ImpactAssessment} (polymorphic with a \texttt{kind} discriminator over DPIA, FRIA, TIA, PIA, and AISIA).
+    \item \textbf{Consequence.} Privacy programs should model these as shared abstract parents with domain-co-owned subtypes rather than as parallel structures inside each owning domain. Shared parents prevent drift between equivalent document subtypes, reduce redundant fields, and centralize audit and retention logic that would otherwise be replicated across domains.
+\end{itemize}
+
+\subsubsection{Many associations have to become entities in their own right once tracked properly}
+
+\begin{itemize}
+    \item \textbf{Observation.} For a substantial subset of relationships in the model, the relationship itself needs to be tracked as a versioned, dated, attributed thing rather than a simple edge.
+    \item \textbf{Mechanism.} Operational reality requires that key relationships carry their own metadata --- which legal basis applied to which activity at what point in time, which role a party held when a consent event occurred, what evidence was logged when. Edges cannot carry this metadata; entities can. DPV identifies this as gap~G6, but treats it as a workaround rather than as a foundational implementation pattern.
+    \item \textbf{Manifestation.} Twelve association classes operationalise the pattern across the model: \texttt{PartyRoleInActivity}, \texttt{LegalBasisAssignment}, \texttt{ConsentEvent}, \texttt{ClassificationAssignment}, \texttt{IdentityStateTransition}, \texttt{NoticeDelivery}, \texttt{Mitigation}, \texttt{Notification}, \texttt{SubmissionSnapshot}, \texttt{RoleFlipEvent}, \texttt{RightExerciseActivity}, and \texttt{EffectivenessReview}.
+    \item \textbf{Consequence.} Privacy architectures targeting L3 or higher should design these as first-class entities from the start. Treating them as edges at L3 forces complete retrofit at L4 and represents the dominant rework cost in maturity-uplift programs.
+\end{itemize}
+
+\subsubsection{Some program areas have to mature before others can}
+
+\begin{itemize}
+    \item \textbf{Observation.} When multiple capability areas are scheduled for maturity advancement, the order matters; some areas function as structural prerequisites for others.
+    \item \textbf{Mechanism.} Cross-domain joins require compatible endpoints on both sides. Certain structural commitments at L3 in one domain reduce L3~$\to$~L4 rework downstream because the receiving domain's interface depends on the upstream choice. The dependency graph is not flat: maturing the wrong domain first wastes work that has to be redone once the prerequisite is in place.
+    \item \textbf{Manifestation.} Domain~\#5 \texttt{PartyRoleInActivity} reification at L3 reduces L3~$\to$~L4 rework in seven other domains; Domain~\#4 \texttt{LegalBasisAssignment} is the second-highest leverage point. The 87 cross-domain joins (J1--J87) catalogue the connective tissue from which the prerequisite graph is derived.
+    \item \textbf{Consequence.} Multi-year maturity roadmaps should be sequenced according to the dependency graph rather than around organisational ownership or executive visibility. Investing in Domain~\#5 and Domain~\#4 at L3 first unlocks improvements across multiple downstream domains; lifting visible domains (consent, rights management) before the backbone domains wastes effort that will be redone.
+\end{itemize}
+
+\subsection{Decisions privacy programs are making without realising it}
+
+\subsubsection{Tooling silently resolves decisions that have no single correct answer}
+
+\begin{itemize}
+    \item \textbf{Observation.} Privacy tooling vendors commit to structural choices that the underlying regulations and standards leave open, and they do so without articulating the choice to the customer.
+    \item \textbf{Mechanism.} Regulations under-specify granularity, primary-entity choice, reification depth, and role-naming conventions. Vendors resolve these silently in their own data models because they have to ship a working product, and the resolution becomes invisible the moment the tool is purchased and configured.
+    \item \textbf{Manifestation.} Forty risk-discretionary decisions (R4C-01 through R4C-40) plus approximately thirty domain-specific open decisions are catalogued in the discretionary periphery. The largest single one (R4C-12) concerns whether the four control themes (Technical~/~Organisational~/~Legal~/~Physical) are modelled as a class hierarchy or as an attribute facet, deriving from the four-axis structure of ISO/IEC~27002:2022.
+    \item \textbf{Consequence.} Commercial privacy tooling should be evaluated against the decisions catalogue during vendor selection. The catalogue gives privacy engineers and architects a structured basis for asking vendors how each decision is resolved, what changing the resolution would cost, and how the vendor's defaults align with the organisation's maturity target and risk posture.
+\end{itemize}
+
+\subsubsection{The room to choose narrows as maturity rises}
+
+\begin{itemize}
+    \item \textbf{Observation.} Decisions that are defensibly either-way at lower maturity levels become structurally constrained at higher levels.
+    \item \textbf{Mechanism.} Higher-maturity requirements (versioning, provenance, temporal validity, attestation) impose structural commitments that would have been undefined at lower maturity. Once these are required, several previously-open choices collapse to a single valid resolution.
+    \item \textbf{Manifestation.} Of the forty R4C decisions, approximately fourteen tighten at L3, seventeen at L4, three at L5, and six remain defensibly either-way across every level. The tightening profile concentrates at L3~$\to$~L4, matching the broader maturity cost surface.
+    \item \textbf{Consequence.} Organisations approaching L2~$\to$~L3 or L3~$\to$~L4 transitions should resolve the catalogue's relevant decisions before the transition begins. Pre-committing prevents the late-stage rework that occurs when a transition reveals structural choices the organisation had been silently making, and surfaces those choices to risk and compliance stakeholders in time to influence the architecture.
+\end{itemize}
+
+\subsubsection{Lower risk tolerance demands more structural commitment}
+
+\begin{itemize}
+    \item \textbf{Observation.} Across the discretionary catalogue, lower organisational risk tolerance correlates with structurally heavier choices: more reification, stricter categorisation, fuller provenance.
+    \item \textbf{Mechanism.} The choices that minimise audit and regulatory exposure also require more structural overhead --- versioned histories, recorded attesting parties, concept hierarchies separated into class trees rather than compressed into attribute facets. Higher tolerance permits lighter structures with lower operational cost; lower tolerance demands the operational cost up front to avoid having to defend the absence of evidence later.
+    \item \textbf{Manifestation.} The R4C catalogue documents the risk-tolerance dimension as a recurring overlay across the forty decisions. The model does not resolve the dimension in either direction; it surfaces the choice so the organisation can make it deliberately.
+    \item \textbf{Consequence.} Privacy engineers should partner with risk officers and the second line of defence to articulate the organisation's risk posture before locking in structural decisions. The catalogue gives both parties a shared vocabulary for distinguishing choices that reflect risk appetite from choices that are non-negotiable at the target maturity level, reducing the late-stage friction that occurs when risk and engineering disagree on architectural defaults.
+\end{itemize}
+
+\subsection{Why moving up maturity levels costs what it does}
+
+\subsubsection{The cost of advancing is uneven across CMMI transitions; L3~$\to$~L4 is the steepest}
+
+\begin{itemize}
+    \item \textbf{Observation.} The cost of advancing a privacy program through CMMI maturity levels is not uniform; one transition is substantially more expensive than the others.
+    \item \textbf{Mechanism.} Reification-validity semantics --- the requirement that key associations carry versioning, temporal validity, and edge provenance --- emerge at L4 and not at L3. Many structures that exist as simple records or edges at L3 require complete structural retrofit to support these semantics at L4.
+    \item \textbf{Manifestation.} 42~documented L3~$\to$~L4 rework points are catalogued across the thirteen domains, clustering under five universal periphery overlays: temporal validity, immutable history, edge provenance, entry versioning, and attestation. The other transitions are characterised differently: L1~$\to$~L2 as register existence (low cost), L2~$\to$~L3 as spine assembly (moderate), L4~$\to$~L5 as automation (operational rather than structural).
+    \item \textbf{Consequence.} Programs planning to move past L3 need to budget for data-architecture work, not only process improvement. An L3~$\to$~L4 plan that funds training and process changes without provisioning for versioned schemas, immutable event logs, and edge provenance underprovisions the actual work; this is the single most common reason maturity-uplift initiatives stall.
+\end{itemize}
+
+\subsubsection{Cross-domain prerequisites force a sequencing order}
+
+\begin{itemize}
+    \item \textbf{Observation.} Some domains cannot reach a given maturity level until other domains have reached it first.
+    \item \textbf{Mechanism.} Certain inter-domain joins are L4-floor constrained: a derived domain cannot reach L4 if its source inventories sit below L4, because the L4 contract of the receiving domain depends on the L4 contract of the upstream domains. The constraint is structural rather than procedural; no amount of process improvement on the derived domain compensates for upstream gaps.
+    \item \textbf{Manifestation.} Domain~\#12 Regulatory Reporting cannot reach L4 without all source inventories at L4. The maturity delta map publishes the prerequisite ordering and identifies the two high-leverage L3 commitments (Domain~\#5 \texttt{PartyRoleInActivity}, Domain~\#4 \texttt{LegalBasisAssignment}) that reduce downstream rework.
+    \item \textbf{Consequence.} Roadmaps should follow the prerequisite graph rather than executive visibility. Programs that lift visible domains (consent, rights management) before backbone domains (entity roles, legal basis) will redo the work; programs that respect the sequencing avoid the rework.
+\end{itemize}
+
+\subsubsection{Operating at mixed maturity levels imposes its own structural cost}
+
+\begin{itemize}
+    \item \textbf{Observation.} Organisations rarely operate every domain at the same maturity level; the cost of operating at mixed levels exceeds what the levels would predict in isolation.
+    \item \textbf{Mechanism.} Inter-domain joins require symmetry. When one side of a join sits at L4 and the other at L3, the L4 side either degrades to L3 semantics or imports translation logic to bridge the gap. Migration scenarios that risk losing provenance impose disproportionate cost because reification-validity semantics do not degrade gracefully; losing provenance forces re-derivation rather than recovery from a lower-fidelity record.
+    \item \textbf{Manifestation.} The asymmetric-retargeting analysis in the maturity delta map identifies the joins where mixed-level operation is structurally costly. System migrations, M\&A integrations, cloud migrations, and legacy decommissions are flagged as the scenarios most likely to break reification-validity.
+    \item \textbf{Consequence.} Maturity programs should aim for level parity within connected subgraphs of domains rather than maximising one domain in isolation. Migration projects that risk losing provenance should be flagged as material risks to the maturity portfolio rather than treated as routine IT work the privacy program absorbs.
+\end{itemize}
+
+\subsubsection{Keeping records current is the single largest gap across the whole program}
+
+\begin{itemize}
+    \item \textbf{Observation.} Maintenance and freshness mechanics --- keeping inventories, assessments, and registers up to date --- is the single largest cross-domain gap in the field.
+    \item \textbf{Mechanism.} Regulations and standards uniformly require records to be ``kept up to date'' without specifying how. No Tier~1 source provides the structural machinery to operationalise the requirement, leaving every adopting organisation to originate the same structure independently.
+    \item \textbf{Manifestation.} The model originates a \texttt{MaintenanceStatus} state machine plus a freshness triad (\texttt{lastReviewedAt}, \texttt{reviewCadenceDays}, \texttt{nextReviewDue}, supported by \texttt{attestationRecord} and \texttt{reviewerIdentity}). It is introduced at L3, enforced at L4, automated at L5. The gap is universal across inventory and assessment domains and absent from all surveyed Tier~1 sources.
+    \item \textbf{Consequence.} The freshness mechanism should be designed into every inventory and assessment at L3 even if review processes are not yet formalised. Retrofitting this metadata at L4 is the single most expensive periphery overlay across the model, the most common cause of stalled L3~$\to$~L4 transitions, and the gap area with the least off-the-shelf vendor support.
+\end{itemize}
+
+\subsection{Gaps in DPV surfaced by the build, and how to close them}
+
+\subsubsection{Thirteen contribution candidates ready for the DPV Community Group}
+
+\begin{itemize}
+    \item \textbf{Observation.} Many of the structural gaps surfaced during the build are not idiosyncratic to this work; they are general gaps that the DPV Community Group could address upstream.
+    \item \textbf{Mechanism.} The gap-discovery process was driven by structural implementation need rather than personal preference. Once a gap appears in multiple sources and multiple domains, it stops being a project-local concern and becomes community-level.
+    \item \textbf{Manifestation.} Thirteen contribution candidates (C1--C13) are packaged in \texttt{04-model/4F DPVCG Contribution Package.md} and organised into three submission batches aligned to the DPV~2.4 (July~2026) and 2.5 release cadence. Foundational reification proposals (\texttt{PartyRoleInActivity}, \texttt{LegalBasisAssignment}, \texttt{ConsentEvent}, category wrappers, \texttt{MaintenanceStatus}) form the first batch; schema additions (LIA/TIA/CompatibilityAssessment, \texttt{Mitigation}, \texttt{EffectivenessReview}, \texttt{ImpactAssessment} polymorphism) form the second; cross-regime and projection (jurisdiction-neutral \texttt{Appeal}, \texttt{NotificationObligation} lookup, view-derivation machinery, \texttt{Processing}~$\to$~\texttt{AIModel} inverse) form the third.
+    \item \textbf{Consequence.} Organisations operating at high maturity in domains the reference model flagged as gap candidates should consider contributing back to the DPVCG. The contribution-candidate package lowers the threshold for community contribution by mapping which gaps are ready for submission and which submission paths already exist.
+\end{itemize}
+
+\subsubsection{Mappings to existing DPVCG GitHub issues that already discuss these gaps}
+
+\begin{itemize}
+    \item \textbf{Observation.} Several of the contribution candidates correspond to open GitHub issues in the DPVCG repository where the same gap is already under discussion.
+    \item \textbf{Mechanism.} The DPVCG works through public issue tracking. When a gap has been raised previously without a structural answer, contributing a proposal against the existing issue is more productive than opening a parallel discussion that splits attention.
+    \item \textbf{Manifestation.} Direct mappings exist to GitHub issues~\#181 (settled precedent), \#282 (in-flight cross-regime notification), \#359 (versioning), \#388 (MLDCAT-AP alignment), and \#410 (privacy signals). Contribution candidates are scoped to attach to these issues rather than to open new ones.
+    \item \textbf{Consequence.} Practitioners with structural patterns to contribute should follow the issue mappings rather than opening new threads. Doing so concentrates community discussion against the existing surface area and shortens the path from contribution to incorporation.
+\end{itemize}
+
+\subsubsection{Where DPV should end and where implementation should begin}
+
+\begin{itemize}
+    \item \textbf{Observation.} The boundary between DPV's appropriate scope and the reference-model layer's appropriate scope is itself an analytic result of the work, not a bureaucratic division of labour.
+    \item \textbf{Mechanism.} DPV publishes concept schemes; the reference-model layer commits to data structures. Where a structural commitment requires choices that depend on regulation, maturity, or risk tolerance, the commitment belongs at the reference-model layer or below --- not at the vocabulary layer that has to serve every adopting program.
+    \item \textbf{Manifestation.} The four-layer architecture (DPV vocabulary, regulation-agnostic core, regulation profiles, periphery) operationalises this division. DPV holds the vocabulary; the core holds the regulation-agnostic backbone; profiles hold regime-specific structure; periphery holds maturity-keyed and discretionary structure. The DPVCG contribution package is scoped to additions appropriate to the vocabulary layer; reference-model commitments stay where they are.
+    \item \textbf{Consequence.} Privacy engineers should not file feature requests with the DPVCG for what are properly reference-model concerns. The appropriate location for structural commitments is the reference-model layer or the organisation's own implementation policies, and the layered division of labour is what keeps both layers stable as they evolve.
+\end{itemize}
+
+% =====================================================================
+
+\section{A Reference Data Model for Privacy Operations}
+
+\subsection{Architecture at a glance}
+
+\subsubsection{The four layers}
+
+\begin{itemize}
+    \item \textbf{Construct.} The reference model is organised as four stacked layers, each with a distinct responsibility and a defined interface to the layers above and below it.
+    \item \textbf{Rationale.} Layering separates concerns that change at different rates --- vocabulary, structure, regulation, maturity --- and supports independent extension. An addition at one layer should not force changes at others; an organisation should be able to advance maturity without touching the regulation profile, or add a new sectoral overlay without touching the core.
+    \item \textbf{Composition.} The bottom layer is DPV~2.3 as published. Above it sits the regulation-agnostic core (34 entities, 65 relationships, 12 reified-association classes). Above the core sit regulation profiles (4 full, 4 sectoral skeletons). At the top sits the periphery (9 maturity-gated structures, 40 risk-discretionary decisions, and per-domain L1--L5 layering published in the maturity delta map).
+    \item \textbf{Use.} Implementers select the layers their program needs and defer the rest. An L2 single-jurisdiction program uses the core and one profile; a multi-regime L4 program composes multiple profiles and instantiates the maturity-keyed periphery. The same logical model accommodates both starting points without re-architecture.
+\end{itemize}
+
+\subsubsection{The design principles that shape the model}
+
+\begin{itemize}
+    \item \textbf{Construct.} Seven principles (P1 through~P7) govern the model's structural commitments and were invoked across every normalisation decision.
+    \item \textbf{Rationale.} Explicit principles keep the build consistent across domains and phases. Without them, each domain would resolve recurring choices locally and the resulting model would not compose; the principles are what makes the layered architecture more than the sum of its layers.
+    \item \textbf{Composition.} P1--P7 are recorded in the Project Charter. P7 (regulation-agnostic core, added during Phase~3 wrap-up as~D11) is the most architecturally consequential: it is the principle that routes regulation-specific structure through profiles rather than into core entities. The remaining principles cover source-traceability, maturity parameterisation against CMMI continuous representation, and the core/periphery partition.
+    \item \textbf{Use.} Future extensions of the model should be checked against the principles, not only against internal reference consistency. The Phase~4 verification artefact (\texttt{4Z}) runs both checks; an extension that satisfies cross-references while violating P7 is structurally worse than an inconsistent draft because the violation is harder to detect once the model has been published.
+\end{itemize}
+
+\subsubsection{What's in the model --- counts and scope}
+
+\begin{itemize}
+    \item \textbf{Construct.} The model spans thirteen capability-area domains and approximately 14{,}000 lines of normalised Phase~4 output.
+    \item \textbf{Rationale.} Published counts let practitioners scope an adoption effort accurately and let reviewers verify the model's scale at a glance. Counts also serve as a unit of measure for extensions: a sectoral overlay can be characterised as ``adds N profile-level entities and M cross-regime mappings'' against the published baseline.
+    \item \textbf{Composition.} 34 core entities; 65 core relationships; 12 reified-association classes; 51 per-domain entities; 37 per-domain relationships; 87 cross-domain joins; 4 full regulation profiles and 4 sectoral skeleton profiles; 9 universal periphery structures; 40 R4C discretionary decisions; 42 documented L3~$\to$~L4 rework points; 13 DPVCG contribution candidates; 23 typed document subtypes under \texttt{AccountabilityArtefact}.
+    \item \textbf{Use.} An implementer can size effort against an internal capability inventory using the per-domain entity and relationship counts; an organisation operating a subset of domains can estimate the data-architecture commitment domain by domain rather than for the model as a whole.
+\end{itemize}
+
+\subsection{The regulation-agnostic backbone}
+
+\subsubsection{The five classes that every implementation contains}
+
+\begin{itemize}
+    \item \textbf{Construct.} Five classes form the invariant core-of-the-core: \texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, and \texttt{PartyRoleInActivity}.
+    \item \textbf{Rationale.} These five appear in every conformant implementation, at every CMMI level, under every supported regulation profile. Their invariance is what makes the rest of the model composable; an addition that violates one of the five would break composition with every adopting program.
+    \item \textbf{Composition.} \texttt{ProcessingActivity} sits at the centre of the spine, connecting all other backbone classes. \texttt{Purpose} attaches via processing-for-purpose; \texttt{PersonalDataCategory} via processing-of-data; \texttt{LegalBasis} typically via the \texttt{LegalBasisAssignment} reification at L3 and above; \texttt{PartyRoleInActivity} is itself a reification of role-in-activity, allowing parties to hold different roles in different activities.
+    \item \textbf{Use.} A privacy program implementing the model should establish these five classes first regardless of which regulation drives the program. Doing so creates a foundation that absorbs additional regulatory regimes without re-architecture; an implementation that conflates these classes or compresses them into one another forfeits that property.
+\end{itemize}
+
+\subsubsection{The thirty-four core entities and sixty-five core relationships}
+
+\begin{itemize}
+    \item \textbf{Construct.} Beyond the five-class invariant, the core contains an additional twenty-nine entities and sixty-five relationships that constitute the regulation-agnostic structural backbone.
+    \item \textbf{Rationale.} The backbone has to be large enough to support all thirteen domains and all four full regulation profiles without per-regime additions; it has to be small enough that no domain or profile is forced to import structure it does not use. The published count reflects the partition.
+    \item \textbf{Composition.} The 34 core entities (codes C-E01 through C-E34) and 65 core relationships (codes C-R01 through C-R65) are catalogued in \texttt{04-model/4A Core Spine.md}. Entity classes include \texttt{Party}, \texttt{System}, \texttt{DataSubject}, \texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, \texttt{JointControllerArrangement}, \texttt{SubprocessorAuthorisation}, \texttt{DPA}, \texttt{AccountabilityArtefact}, and the twelve reified-association classes.
+    \item \textbf{Use.} The core catalogues serve as the canonical baseline for any data-architecture review. Entities not in the catalogue belong in profiles, periphery, or per-domain layers, not in the core; the partition is what allows the core to remain stable while the surrounding layers evolve.
+\end{itemize}
+
+\subsubsection{Twelve associations promoted to first-class entities}
+
+\begin{itemize}
+    \item \textbf{Construct.} Twelve relationships that would naturally be edges in a simple model are promoted to first-class entity classes so they can carry their own metadata, versioning, and lifecycle.
+    \item \textbf{Rationale.} DPV identifies this need as gap~G6 --- attaching metadata to a relationship requires promoting it to a node --- but treats it as a workaround. The reference model treats it as a foundational implementation pattern because every relationship that needs versioning, evidence, temporal validity, or attribution requires it.
+    \item \textbf{Composition.} The twelve reified-association classes are \texttt{PartyRoleInActivity}, \texttt{LegalBasisAssignment}, \texttt{ConsentEvent}, \texttt{ClassificationAssignment}, \texttt{IdentityStateTransition}, \texttt{NoticeDelivery}, \texttt{Mitigation}, \texttt{Notification}, \texttt{SubmissionSnapshot}, \texttt{RoleFlipEvent}, \texttt{RightExerciseActivity}, and \texttt{EffectivenessReview}.
+    \item \textbf{Use.} Privacy architectures targeting L3 or above should implement these as first-class entities from the start. L3 designs that leave them as edges force complete retrofit at L4 and represent the dominant rework cost in maturity-uplift programs.
+\end{itemize}
+
+\subsubsection{Three concepts that emerged from cross-program consolidation}
+
+\begin{itemize}
+    \item \textbf{Construct.} Three unifying classes were identified at cross-domain synthesis as parents of concepts that recur across multiple program areas: \texttt{AccountabilityArtefact}, \texttt{Notice}, and \texttt{ImpactAssessment}.
+    \item \textbf{Rationale.} Without shared parents, each domain that produces equivalent document subtypes (DPAs, joint-controller arrangements, sub-processor authorisations, DPIAs, SoAs) maintains parallel structures that drift apart over time. Shared parents prevent drift and centralize cross-cutting concerns such as audit and retention.
+    \item \textbf{Composition.} \texttt{AccountabilityArtefact} is the abstract parent of 23 typed document subtypes spanning eight domains. \texttt{Notice} is a thin abstract parent with concrete subtypes co-owned by the domain that triggers their issuance. \texttt{ImpactAssessment} is polymorphic with a \texttt{kind} discriminator over DPIA, FRIA, TIA, PIA, and AISIA.
+    \item \textbf{Use.} An implementer designing document-management or evidence-storage subsystems should structure them against the shared parents rather than against each typed subtype. Doing so reduces redundant fields, prevents subtype drift, and centralises audit and retention logic that would otherwise be replicated.
+\end{itemize}
+
+\subsubsection{How program areas connect to each other}
+
+\begin{itemize}
+    \item \textbf{Construct.} 87 cross-domain joins (J1 through~J87) catalogue the connective tissue between the thirteen capability-area domains.
+    \item \textbf{Rationale.} Each domain produces or consumes structure that other domains need. The join inventory is the basis on which inter-domain consistency, maturity sequencing, and integration testing can be planned; without it, integration points have to be re-discovered every time a domain is touched.
+    \item \textbf{Composition.} The 87 joins decompose into per-pair joins between specific domains and five universal cross-cutting joins (notification, maintenance, accountability evidence) that apply as patterns rather than as single edges. The join inventory is the source of the prerequisite graph that drives maturity sequencing.
+    \item \textbf{Use.} Integration work between domains --- whether within a single privacy program or across the privacy/security/audit/legal boundary --- should be scoped against the join inventory. Joins that cross the privacy-program boundary are where data-quality issues concentrate and where integration testing repays the investment most directly.
+\end{itemize}
+
+\subsection{Regulations as overlays on the backbone}
+
+\subsubsection{How a regulation attaches to the backbone}
+
+\begin{itemize}
+    \item \textbf{Construct.} A regulation profile is an overlay structure that attaches regulation-specific mandatory fields, named concept instances, projection views, and cross-regime mappings to the regulation-agnostic core.
+    \item \textbf{Rationale.} Profiles let the core remain regulation-agnostic while still satisfying the regime-specific obligations any conformant program must produce. The overlay mechanism is what makes multi-regime composition possible without privileging any single regime structurally.
+    \item \textbf{Composition.} A profile defines its regulatory scope, the mandatory fields it overlays onto core entities (e.g., GDPR~Art.~30 fields on \texttt{ProcessingActivity}), regime-specific concept instances (legal-basis values, role names), projection views (e.g., the RoPA template as a derived view over the inventory), and cross-regime mappings (e.g., GDPR controller~$\leftrightarrow$~CCPA business).
+    \item \textbf{Use.} An organisation adopting a new regulation should construct or import the corresponding profile rather than modifying core entities. If a needed obligation cannot be expressed as a profile overlay, the model's design is being violated and the structural problem should be raised rather than worked around in the core.
+\end{itemize}
+
+\subsubsection{Four full profiles: GDPR, CCPA/CPRA, LGPD, DPDPA}
+
+\begin{itemize}
+    \item \textbf{Construct.} Four regulation profiles are published in full, covering the EU, the US (California), Brazil, and India.
+    \item \textbf{Rationale.} These four regimes cover the bulk of large-organisation privacy operations globally and exercise the profile mechanism against materially different regulatory designs --- rights-based (GDPR), opt-out-based (CCPA/CPRA), consent-driven (LGPD), and fiduciary-based (DPDPA).
+    \item \textbf{Composition.} The four profiles are \texttt{eu-gdpr}, \texttt{us-ca-ccpa}, \texttt{br-lgpd}, and \texttt{in-dpdpa}. Each profile is implemented as a complete overlay including mandatory fields, concept instances, projection views, and cross-regime mappings to the other three.
+    \item \textbf{Use.} An organisation operating under one of these four regimes can adopt the corresponding profile directly. An organisation operating under multiple can compose profiles using the multi-regime composition mechanism documented alongside the profile catalogue.
+\end{itemize}
+
+\subsubsection{Four sectoral starting points: HIPAA, GLBA, FCRA, COPPA}
+
+\begin{itemize}
+    \item \textbf{Construct.} Four sectoral profiles are published as skeletons --- partial overlays that establish the regulatory scope and identify the principal mandatory-field categories, but stop short of full implementation.
+    \item \textbf{Rationale.} Sectoral regulations interact with the four full profiles in ways that depend on the organisation's scope and the specific data categories involved; full profiles for each sectoral would over-commit. Skeletons let an adopting organisation extend the overlay against its own scope without inheriting unnecessary structure.
+    \item \textbf{Composition.} The four sectoral skeletons are \texttt{us-hipaa} (HIPAA), \texttt{us-glba} (GLBA), \texttt{us-fcra} (FCRA), and \texttt{us-coppa} (COPPA). Each skeleton names the regulatory scope, identifies the principal mandatory-field categories, and stubs the integration points with the four full profiles.
+    \item \textbf{Use.} An organisation operating under a sectoral regulation should extend the corresponding skeleton rather than rebuilding from scratch. The skeleton provides the integration scaffolding with general-purpose profiles and reduces the work to the organisation's own data categories.
+\end{itemize}
+
+\subsubsection{Operating under multiple regulations at once}
+
+\begin{itemize}
+    \item \textbf{Construct.} Multi-regime composition lets a single processing activity carry multiple regulation profiles concurrently.
+    \item \textbf{Rationale.} Cross-jurisdictional processing is normal in large organisations; the model has to support an activity under both EU-GDPR and US-CCPA/CPRA without requiring one regime to be chosen as primary.
+    \item \textbf{Composition.} The composition mechanism takes the union of mandatory fields across attached profiles; conflicts (e.g., divergent retention requirements) are surfaced as decisions rather than silently resolved. A worked example in \texttt{4A.5} walks through a US/EU SaaS activity under both \texttt{eu-gdpr} and \texttt{us-ca-ccpa}.
+    \item \textbf{Use.} An organisation with cross-jurisdictional processing should structure activities against the union of applicable profiles. Tooling that demands a single regulatory classification per activity is forcing false reconciliation and losing the structural composition the model preserves.
+\end{itemize}
+
+\subsection{Layers that get added as a program matures}
+
+\subsubsection{Nine structural additions that recur across all program areas}
+
+\begin{itemize}
+    \item \textbf{Construct.} Nine universal periphery structures recur across all capability areas as a program advances through CMMI levels.
+    \item \textbf{Rationale.} These structures are not specific to any one domain; they are the structural overhead that any maturity-aware data architecture requires. Cataloguing them once and applying them as a pattern is more efficient than re-deriving them per domain, and ensures consistency across the maturity surface.
+    \item \textbf{Composition.} The nine universal structures are temporal validity, immutable history, edge provenance, entry versioning, attestation, maintenance status, the freshness triad, derivation links, and contribution provenance. They are introduced at varying levels between L3 and L5; the full taxonomy appears in \texttt{04-model/4B Maturity-Gated Periphery.md}~\S4.
+    \item \textbf{Use.} An organisation planning maturity uplift should apply the universal structures domain by domain in known order rather than re-discovering the pattern. The universal catalogue is the basis on which the per-domain maturity layers are constructed.
+\end{itemize}
+
+\subsubsection{What each program area looks like at each CMMI level (L1--L5)}
+
+\begin{itemize}
+    \item \textbf{Construct.} Each of the thirteen capability-area domains has an explicit per-level structural layering, published as the maturity delta map.
+    \item \textbf{Rationale.} Without per-domain per-level structure, an organisation cannot estimate the data-architecture rework required to advance a given domain to a target level. The delta map makes the estimate explicit and supports investment planning against a published baseline.
+    \item \textbf{Composition.} The maturity delta map (\texttt{04-model/4E Maturity Delta Map.md}) publishes per-domain L1--L5 layering for all thirteen domains. Each level adds specific structures from the universal periphery catalogue and/or domain-specific structures; the map identifies the cumulative structural footprint at each level.
+    \item \textbf{Use.} A program planning a multi-year maturity roadmap can use the delta map to estimate the data-architecture rework for each target transition. The map is the practitioner-facing deliverable that most directly supports investment planning.
+\end{itemize}
+
+\subsubsection{The forty-two rework points between L3 and L4}
+
+\begin{itemize}
+    \item \textbf{Construct.} Forty-two specific L3~$\to$~L4 rework points are catalogued across the thirteen domains, identifying the structural changes required to advance a domain from L3 to L4.
+    \item \textbf{Rationale.} L3~$\to$~L4 is the most expensive transition in the model. Cataloguing the rework points lets organisations cost the transition and plan it sequentially rather than discovering its scope mid-project.
+    \item \textbf{Composition.} The 42 rework points are documented in \texttt{04-model/4B Maturity-Gated Periphery.md}~\S6 and cluster under five universal periphery overlays: temporal validity, immutable history, edge provenance, entry versioning, and attestation. Each rework point identifies the source structure (L3 form) and the target structure (L4 form).
+    \item \textbf{Use.} A program planning an L3~$\to$~L4 transition should walk the 42 rework points domain by domain, identifying which apply to its scope and budgeting accordingly. Programs that skip this step underprovision the transition and tend to stall.
+\end{itemize}
+
+\subsubsection{Keeping records current --- the maintenance status and freshness mechanism}
+
+\begin{itemize}
+    \item \textbf{Construct.} A \texttt{MaintenanceStatus} state machine plus a freshness triad (\texttt{lastReviewedAt}, \texttt{reviewCadenceDays}, \texttt{nextReviewDue}) and supporting attributes (\texttt{attestationRecord}, \texttt{reviewerIdentity}) operationalise the ``keep records up to date'' requirement that regulations and standards uniformly impose.
+    \item \textbf{Rationale.} No surveyed Tier~1 source provides the structural machinery to operationalise the freshness requirement, but the requirement is universal. The model originates the machinery so adopting organisations do not each have to.
+    \item \textbf{Composition.} \texttt{MaintenanceStatus} is introduced at L3 (data exists, status tracked), enforced at L4 (reviews logged with attestation and reviewer identity), and automated at L5 (cadence-driven workflows). The freshness triad applies to all inventory and assessment entities; the universal structure catalogue defines the per-entity overlay.
+    \item \textbf{Use.} The freshness mechanism should be designed into every inventory and assessment at L3 even if review processes are not yet formalised. Retrofitting it at L4 is the single most expensive periphery overlay across the model.
+\end{itemize}
+
+\subsection{Layers that depend on the organisation's risk tolerance}
+
+\subsubsection{Forty decisions the organisation must make for itself}
+
+\begin{itemize}
+    \item \textbf{Construct.} Forty risk-discretionary decisions (R4C-01 through R4C-40) are catalogued as choices the model does not resolve on the organisation's behalf.
+    \item \textbf{Rationale.} These decisions depend on organisational risk tolerance rather than on regulation or maturity. Resolving them in the model would impose a single risk posture on every adopting organisation; cataloguing them surfaces each choice with stated trade-offs.
+    \item \textbf{Composition.} The 40 decisions are documented in \texttt{04-model/4C Risk-Discretionary Periphery.md}. Each entry includes the structural alternatives, the trade-offs (operational cost against audit exposure), the risk-tolerance dimension, and the maturity-tightening behaviour. The single largest decision is R4C-12 (Technical~/~Organisational~/~Legal~/~Physical control themes as class hierarchy versus attribute facet), which derives from the four-axis structure of ISO/IEC~27002:2022.
+    \item \textbf{Use.} An organisation adopting the model should resolve each R4C decision against its risk posture as a deliberate step rather than treating them as defaults. The catalogue gives privacy engineers and risk officers a shared vocabulary for the decision.
+\end{itemize}
+
+\subsubsection{The patterns these decisions tend to fall into}
+
+\begin{itemize}
+    \item \textbf{Construct.} The forty R4C decisions cluster into a smaller set of recurring patterns that appear across multiple decisions.
+    \item \textbf{Rationale.} Identifying the patterns lets an organisation resolve groups of related decisions consistently rather than treating each in isolation. Consistency at the pattern level reduces structural surprises at integration time, when independently-made decisions would otherwise interact unexpectedly.
+    \item \textbf{Composition.} Recurring patterns include primary-entity choice, categories vs instances, granularity, reification depth, cross-regime modelling, role-as-type vs role-as-relation, and theme-as-type vs theme-as-attribute. The patterns are documented alongside the decision catalogue in \texttt{4C}~\S4.
+    \item \textbf{Use.} An organisation should resolve the pattern (e.g., ``we prefer role-as-relation throughout'') before walking the individual decisions. Doing so collapses the catalogue from 40 independent decisions to a smaller number of organisational stances applied consistently across the model.
+\end{itemize}
+
+\subsubsection{How that discretion narrows as maturity rises}
+
+\begin{itemize}
+    \item \textbf{Construct.} Decisions that are defensibly either-way at L1--L2 progressively narrow as maturity advances; many tighten at L3, more at L4, and a small number remain defensibly either-way across every level.
+    \item \textbf{Rationale.} Higher-maturity requirements impose structural commitments that would have been undefined at lower maturity. Once they are required, several previously-open choices collapse to a single valid resolution; the catalogue documents the collapse to support planning.
+    \item \textbf{Composition.} The maturity-tightening distribution across the 40 decisions: approximately 14 tighten at L3, 17 at L4, 3 at L5, and 6 remain defensibly either-way across every level. The tightening profile concentrates at L3~$\to$~L4, matching the broader maturity cost surface.
+    \item \textbf{Use.} An organisation approaching L2~$\to$~L3 or L3~$\to$~L4 transitions should resolve the catalogue's tightening decisions before the transition begins. Pre-committing prevents the late-stage rework that occurs when a transition reveals structural choices the organisation had been silently making.
+\end{itemize}
+
+\subsection{What the model looks like in each program area}
+
+\subsubsection{Which areas are modelled deeply, lightly, or as interfaces only}
+
+\begin{itemize}
+    \item \textbf{Construct.} The thirteen capability areas are assigned treatment tiers --- deeply modelled, lightly modelled, or interface-only --- based on prior-art density.
+    \item \textbf{Rationale.} Deep modelling of areas with thin prior art would substitute internal speculation for sourced evidence; light modelling of areas with dense prior art would waste the available material. Treatment-tier assignment matches modelling depth to source availability and preserves the traceability commitment.
+    \item \textbf{Composition.} Nine deeply modelled domains (Processing Inventory, Purpose, Personal Data, Legal Basis, Entities/Roles, Consent, Rights, Risk/DPIA, TOM/Controls); three lightly modelled (Notice, Incident, Regulatory Reporting); one interface-only (Technology/AI Governance).
+    \item \textbf{Use.} Implementers should plan effort against the treatment tier. Deep domains require sophisticated configuration of existing structures; light domains require more internal origination; the interface-only domain requires the organisation to originate the structure entirely while preserving the documented integration points.
+\end{itemize}
+
+\subsubsection{The processing spine: Inventory, Purpose, Personal Data, Legal Basis, Entities \& Roles}
+
+\begin{itemize}
+    \item \textbf{Construct.} Five domains form the processing spine --- the structural backbone of the operational privacy program.
+    \item \textbf{Rationale.} These domains are the structural prerequisites for the rest of the model; they have to mature first and stabilise before downstream domains can advance. Programs that defer the spine in favour of more visible domains discover the prerequisite at integration time and pay the cost in rework.
+    \item \textbf{Composition.} Domain~\#1 Processing Inventory (maintained data, per~D9); Domain~\#2 Purpose Specification and Governance; Domain~\#3 Personal Data Inventory and Classification; Domain~\#4 Legal Basis Management; Domain~\#5 Entities, Roles and Accountability. Per-domain composed models in \texttt{04-model/4D-01} through \texttt{4D-05}.
+    \item \textbf{Use.} Programs should sequence the spine first in any maturity roadmap. Investment in Domain~\#5 (\texttt{PartyRoleInActivity}) and Domain~\#4 (\texttt{LegalBasisAssignment}) at L3 are the two highest-leverage commitments in the model.
+\end{itemize}
+
+\subsubsection{Individual-facing operations: Consent, Rights, Notice}
+
+\begin{itemize}
+    \item \textbf{Construct.} Three domains cover the operations through which individuals interact with the privacy program: Consent, Rights, and Notice.
+    \item \textbf{Rationale.} These domains share a common pattern --- individual-facing, event-driven, often legally-mandated --- while addressing distinct functions. Grouping them lets practitioners scope the individual-facing program coherently and surface the shared structural patterns (event reification, individual identity binding, regulatory tracing).
+    \item \textbf{Composition.} Domain~\#6 Consent Management; Domain~\#7 Data Subject Rights Management; Domain~\#8 Notice and Transparency. Per-domain composed models in \texttt{04-model/4D-06} through \texttt{4D-08}. Consent and Rights are deeply modelled; Notice is lightly modelled.
+    \item \textbf{Use.} Programs should architect these three domains together where possible. Consent events, rights exercises, and notice deliveries share event-reification patterns that benefit from unified design and would drift if each domain were architected in isolation.
+\end{itemize}
+
+\subsubsection{Risk, controls, and incidents}
+
+\begin{itemize}
+    \item \textbf{Construct.} Three domains cover the risk-management spine: Risk and Impact Assessment, Technical and Organisational Measures, and Incident and Breach Management.
+    \item \textbf{Rationale.} Risk identification, control implementation, and incident response form a feedback loop. Modelling them as a connected group surfaces the loop structurally and exposes where the loop is broken in adopting organisations.
+    \item \textbf{Composition.} Domain~\#9 Risk and Impact Assessment; Domain~\#10 Technical and Organisational Measures; Domain~\#11 Incident and Breach Management. Per-domain composed models in \texttt{04-model/4D-09} through \texttt{4D-11}. Risk and Controls are deeply modelled; Incident is lightly modelled.
+    \item \textbf{Use.} Programs should ensure the Risk~$\to$~Controls~$\to$~Incident loop is structurally closed. Gaps in the loop --- risk assessments that do not link to controls, incidents that do not update risk posture --- are among the most common sources of audit findings in this area.
+\end{itemize}
+
+\subsubsection{Regulatory reporting and the technology/AI interface}
+
+\begin{itemize}
+    \item \textbf{Construct.} Two cross-cutting domains complete the model: Regulatory Reporting and the Technology/AI Governance interface.
+    \item \textbf{Rationale.} Reporting is a derived view over the operational inventories rather than primary data (per~D9). Technology/AI Governance is an interface-only domain awaiting the stabilisation of its principal Tier~1 sources (EU AI Act, ISO/IEC~42001, ISO/IEC~42005, NIST AI~RMF, MLDCAT-AP); deep modelling in advance of that stabilisation would commit to structure that the sources may overturn.
+    \item \textbf{Composition.} Domain~\#12 Regulatory Reporting and Disclosure (lightly modelled --- defines projection views and their dependencies on source inventories); Domain~\#13 Technology and AI Governance (interface-only --- defines integration points with Tech/AI structures but does not commit to internal structure pending Tier~1 source stabilisation).
+    \item \textbf{Use.} Programs should treat Regulatory Reporting as a derivation problem rather than a data-entry problem; maintaining a report as primary hand-kept data is a maturity anti-pattern (per~D9). Technology/AI Governance should be scoped to integration points with the existing model and re-evaluated when the EU AI Act and ISO/IEC~42001 are sufficiently stable to model deeply.
+\end{itemize}
+
+
+
+\section{Methodology}
 \label{sec:3}
 At a high level, the methodology consists of the following milestones:
  
@@ -431,7 +991,170 @@ The DPV, as an ontology, does not consider object attributes, typing, or keys. A
 \subsection{Measurement and Evaluation}
     Tables and attributes were defined.
     
-\section{Analysis and Observation}
+\section{Analysis and Observations}
+
+\subsection{Structure of the Reference Model}
+
+\subsubsection{The reference model greatly exceeds the mass of the DPV}
+
+While expected to some degree, it was observed that the area occupied by the Reference Data Model substantially exceeded the surface area of the DPV. This is a likely byproduct of the DPV's design as an ontology, rather than a schema. The Reference Model was ultimately composed of:
+\begin{enumerate}
+    \item 34 "core" invariant entities
+    \item 65 single-domain entities
+    \item 65 core relationships.
+    \item 37 per-domain relationships.
+    \item 12 reified-association classes
+    \item 87 (potential) cross-domain relationships/joins.
+    
+\end{enumerate}
+For organizations who seek to implement the DPV, this establishes the idea that DPV adoption alone is insufficient as the basis for a privacy data model and suggests that organizations should budget substantial effort in mapping these relationships, either from a reference such as the one proposed here through manually deriving these relationships.
+
+
+
+%\begin{itemize}
+ %   \item The truly invariant portion is small relative to the surrounding model: five classes (\texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, \texttt{Party-Role-In-Activity}) form the core-of-the-core against 34 entities in the broader regulation-agnostic spine.
+  %  \item Per-domain entity and relationship counts vary by an order of magnitude --- from 6 issues in Tech/AI Governance to 67 in Entities, Roles and Accountability --- tracking the density of prior art per capability area.
+%\end{itemize}
+
+\subsubsection{Asymmetric depth across domains}
+
+It was observed that there was an inconsistent depth of modeled relationships across each domain. This is likely a confluence of the following factors:
+\begin{enumerate}
+    \item Externally, there is not parity across domains with respect to regulatory guidance and standards, that are used as inputs within this exercise. 
+    \item The methodology explicitly defined some domains as requiring deeper modeling than others, although at higher maturity overlays, the impacts of this are mitigated to some extent.
+\end{enumerate}
+
+For organizations who seek to implement the DPV, this leaves more opportunity to 
+
+\emph{We observed asymmetric analytic depth across capability areas} --- a byproduct of the uneven maturity of prior art per domain, where regulator guidance and standards have addressed some areas densely and others thinly --- reflected in the treatment-tier distribution of 9 deeply-modelled, 3 lightly-modelled, and 1 interface-only domain. \textbf{For implementers in practice, this means the level of in-house origination required varies by domain: areas with dense prior art (Entities, Risk/DPIA, Controls) demand sophisticated configuration of existing structures, while thinly-addressed areas (Notice, Incident, Reporting) require the organization to originate more structure internally --- affecting team composition, vendor evaluation, and where architectural review effort should concentrate.}
+
+\begin{itemize}
+    \item Domains under the most regulator and standards attention generated the largest per-domain issue counts; thinly-addressed areas generated the smallest.
+\end{itemize}
+
+\subsubsection{Per-source enumeration at scale}
+
+\emph{We observed that exposing implementer-facing decisions and gaps required per-source enumeration at scale} --- a byproduct of structural implications being unevenly distributed across multiple Tier~1 sources per domain rather than concentrated in any single canonical reference --- reflected in the analytic surface area: 578 per-source implied relationships extracted in Phase~3, consolidating to 405 distinct issues (160 gaps, 139 decisions, 103 disagreements, 3 drift items) in the consolidated register. \textbf{For implementers in practice, this means the consolidated registers can be adopted directly as the operational baseline rather than rebuilt internally; the per-source distillation work has been done once for shared reuse, saving each organization the months of comparative source analysis that would otherwise be required to surface the same structural implications.}
+
+\subsection{The processing spine as the regulation-agnostic structural backbone}
+
+\subsubsection{Regulations re-instantiate a common backbone}
+
+\emph{We observed that every privacy regulation effectively re-instantiates the same backbone} --- a byproduct of regulations encoding the same underlying operational reality (who processes which data, for which purpose, under which legal authority) in slightly different vocabularies --- reflected as a five-class invariant (\texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, \texttt{Party-Role-In-Activity}) that appears in every conformant implementation, at every CMMI level, under every supported regulation profile. \textbf{For implementers in practice, this means privacy data architecture should establish the five-class spine first regardless of which regulation drives the initial program; doing so creates a foundation that absorbs additional regulatory regimes without re-architecture, rather than forcing structural rework when a US-only program expands into EU operations or a second sectoral overlay is added.}
+
+\begin{itemize}
+    \item The spine is functional, not regulatory: each relationship is named for the operational concern it satisfies rather than the GDPR articles that originally motivated its identification.
+    \item This finding directly enabled the regulation-agnostic principle (Charter P7~/~D11): if the backbone is functionally universal, regulation-specific obligations can attach as overlays without privileging any single regime.
+\end{itemize}
+
+\subsubsection{The implementation core is smaller than regulations imply}
+
+\emph{We observed that the structural core needed for implementation is substantially smaller than regulations imply} --- a byproduct of regulations bundling structural requirements with regime-specific mandatory fields, names, and templates that need not sit in the core --- reflected in the routing of all regime-specific structure to the regulation-profile layer, leaving only the 5 invariant relationships at the core-of-the-core and 65 at the broader core. \textbf{For implementers in practice, this means regulation-specific obligations (mandatory fields, named instances, reporting templates) must be modelled as profile overlays rather than baked into core entities; the discipline of keeping them isolated is what prevents costly re-engineering when scope expands across jurisdictions or sectoral overlays are introduced, and it is the single architectural decision that most determines multi-regime extensibility.}
+
+\begin{itemize}
+    \item GDPR Art.~30 mandatory-field overlays attach as \texttt{eu-gdpr} profile overlays, not core requirements; analogous CCPA, LGPD, and DPDPA overlays sit at the same layer.
+    \item Multi-regime composition under one processing activity becomes the union of mandatory fields across profiles rather than a reconciliation of competing canonical schemas.
+\end{itemize}
+
+\subsection{Cross-domain integration and emergent unifying classes}
+
+\subsubsection{Cross-cutting structural concerns resist single-domain ownership}
+
+\emph{We observed that certain structural concerns resist being owned by any single capability area} --- a byproduct of accountability, notice, and impact assessment being inherently cross-cutting rather than domain-local --- reflected in three emergent unifying classes that surfaced only at the cross-domain consolidation pass. \textbf{For implementers in practice, this means cross-cutting artefacts (DPAs, joint-controller arrangements, sub-processor authorisations, DPIAs, SoAs, consent records, notice versions, evidence records) should be modelled under shared abstract parents --- \texttt{AccountabilityArtefact}, \texttt{Notice}, \texttt{ImpactAssessment} --- rather than as parallel structures inside each owning domain; the shared-parent discipline prevents drift between equivalent document subtypes, reduces redundant fields, and centralizes audit and retention logic that would otherwise be replicated.}
+
+\begin{itemize}
+    \item \texttt{AccountabilityArtefact} is an abstract parent of 23 typed document classes that no single domain owns.
+    \item \texttt{Notice} is a thin abstract parent with concrete subtypes co-owned by their triggering domain --- resolving the standalone-vs-merge question for the Notice domain.
+    \item \texttt{ImpactAssessment} is polymorphic with a \texttt{kind} discriminator over DPIA~/~FRIA~/~TIA~/~PIA~/~AISIA.
+\end{itemize}
+
+\subsubsection{Reification by promotion as the foundational pattern}
+
+\emph{We observed that DPV's gap~G6 (attaching metadata to an association requires promoting it to an instance node) is not a workaround but a foundational pattern} --- a byproduct of operational reality requiring versioning, provenance, evidence, and temporal validity on what would otherwise be simple edges --- reflected in 12 reified-association classes that operationalise the same pattern across the model (\texttt{PartyRoleInActivity}, \texttt{LegalBasisAssignment}, \texttt{ConsentEvent}, \texttt{ClassificationAssignment}, \texttt{IdentityStateTransition}, \texttt{NoticeDelivery}, \texttt{Mitigation}, \texttt{Notification}, \texttt{SubmissionSnapshot}, \texttt{RoleFlipEvent}, \texttt{RightExerciseActivity}, \texttt{EffectivenessReview}). \textbf{For implementers in practice, this means association classes (party-role-in-activity, legal-basis-assignment, consent-event, and the other nine) should be designed as first-class entities from the start of any L3-targeted architecture; treating them as edges at L3 forces complete retrofit at L4 and represents the dominant rework cost in maturity uplift programs.}
+
+\subsubsection{The inter-domain dependency graph is not flat}
+
+\emph{We observed that the inter-domain dependency graph is not flat} --- a byproduct of certain structural commitments propagating their requirements to downstream domains --- reflected in the prerequisite graph where Domain~\#5 \texttt{PartyRoleInActivity} reification at L3 reduces L3~$\to$~L4 rework in seven other domains and Domain~\#4 \texttt{LegalBasisAssignment} reification is the second-highest leverage point. \textbf{For implementers in practice, this means maturity uplift programs should be sequenced according to the dependency graph rather than around organizational ownership or executive visibility; investing in Domain~\#5 Entities and Domain~\#4 Legal Basis at L3 first unlocks improvements across multiple downstream domains, whereas attempting to mature consent or rights management before the entity backbone is in place wastes effort that will be redone.}
+
+\begin{itemize}
+    \item The 87 cross-domain joins (J1--J87) catalogue the connective tissue; five are universal cross-cutting joins (notification, maintenance, accountability evidence) that apply as patterns rather than as single edges.
+\end{itemize}
+
+\subsection{Decision points and the shape of implementer discretion}
+
+\subsubsection{Silent resolution of structural choices in tooling}
+
+\emph{We observed that many structurally-defensible-either-way choices are silently resolved by tooling vendors without explicit articulation} --- a byproduct of regulations under-specifying granularity, primary-entity choice, and reification depth, leaving these to controllers --- reflected in an explicit decisions catalogue: 40 risk-discretionary decisions (R4C-01 through R4C-40) plus approximately 30 domain-specific open decisions. \textbf{For implementers in practice, this means commercial privacy tooling should be evaluated against the decisions catalogue during vendor selection --- most vendors lock these in without surfacing the choice, and the catalogue gives privacy engineers and architects a structured basis for asking vendors how each decision is resolved, what the cost of changing it would be, and how the vendor's defaults align with the organization's maturity target and risk posture.}
+
+\begin{itemize}
+    \item The catalogue traces 103 documented source disagreements down to a smaller set of recurring structural choices --- primary entity, categories vs instances, granularity, reification depth, cross-regime modelling, role-as-type vs role-as-relation, theme-as-type vs theme-as-attribute.
+    \item The single highest-impact decision is R4C-12 (Technical~/~Organisational~/~Legal~/~Physical as class hierarchy versus attribute facet, deriving from ISO/IEC~27002:2022).
+\end{itemize}
+
+\subsubsection{Discretion narrows as maturity rises}
+
+\emph{We observed that discretion narrows as maturity rises} --- a byproduct of higher-maturity requirements (versioning, provenance, temporal validity) imposing structural commitments that would be undefined at lower maturity --- reflected in the maturity-tightening distribution: approximately 14 decisions tighten at L3, 17 at L4, 3 at L5, and 6 remain defensibly either-way across every level. \textbf{For implementers in practice, this means organizations approaching L2~$\to$~L3 or L3~$\to$~L4 transitions should resolve the catalogue's relevant decisions before the transition begins rather than during; pre-committing prevents the late-stage rework that occurs when a transition reveals structural choices the organization had been silently making, and it surfaces the choices to risk and compliance stakeholders early enough to influence the architecture rather than after the fact.}
+
+\subsubsection{Risk tolerance and structural commitment are inversely correlated}
+
+\emph{We observed that risk tolerance and structural commitment are inversely correlated} --- a byproduct of low risk tolerance demanding more reification, stricter categorisation, and fuller provenance while higher tolerance permits looser structures with lower operational overhead --- reflected as a risk-tolerance dimension layered over the decision catalogue. \textbf{For implementers in practice, this means privacy engineers should partner with risk officers and the second line of defense to articulate the organization's risk posture before locking in structural decisions; the catalogue gives both parties a shared vocabulary for distinguishing choices that reflect risk appetite from choices that are non-negotiable at the targeted maturity level, reducing the late-stage friction that occurs when risk and engineering disagree on architectural defaults.}
+
+\subsection{Maturity change considerations and the L3~$\to$~L4 cost surface}
+
+\subsubsection{The cost of maturity advancement is asymmetric}
+
+\emph{We observed that the cost of advancing privacy program maturity is asymmetric across CMMI transitions} --- a byproduct of reification-validity semantics emerging only at L4 and not at L3 --- reflected in the per-transition cost characterisation: L1~$\to$~L2 register existence (low), L2~$\to$~L3 spine assembly (moderate), L3~$\to$~L4 reification + versioning + temporal validity + edge provenance (high), L4~$\to$~L5 automation (operational rather than structural). \textbf{For implementers in practice, this means organizations planning to move past L3 must budget for data-architecture work --- versioned schemas, immutable event logs, edge provenance, attestation mechanisms --- not only for process improvement; planning the transition as a workflow or training initiative without the structural rework underprovisions the actual work and leads to programs that stall at the transition, with the L3~$\to$~L4 jump being the single most common point of failure for maturity-uplift initiatives.}
+
+\begin{itemize}
+    \item 42 L3~$\to$~L4 structural rework points are catalogued across the 13 domains, clustering under five universal periphery overlays: temporal validity, immutable history, edge provenance, entry versioning, and attestation.
+\end{itemize}
+
+\subsubsection{Cross-domain prerequisites impose sequencing}
+
+\emph{We observed that cross-domain prerequisite structure imposes a sequencing logic on maturity uplift} --- a byproduct of cross-domain joins requiring compatible endpoints at both sides --- reflected in the L4-floor rule (Domain~\#12 Regulatory Reporting cannot reach L4 without all source inventories at L4) and in the two high-leverage L3 commitments (Domain~\#5 \texttt{PartyRoleInActivity}, Domain~\#4 \texttt{LegalBasisAssignment}) that reduce rework in many downstream domains. \textbf{For implementers in practice, this means multi-year maturity roadmaps should be sequenced in dependency order using the prerequisite graph as the planning input; the largest realizable returns come from completing Domain~\#5 (Entities) at L3 before lifting other domains, and program governance should resist pressure to prioritize visible domains (consent, rights management) over backbone domains (entity roles, legal basis) when the dependency graph indicates otherwise.}
+
+\subsubsection{Mixed-level operation incurs a structural cost}
+
+\emph{We observed that organisations operating at mixed maturity levels incur a structural cost beyond the sum of their parts} --- a byproduct of inter-domain joins requiring symmetry while regression scenarios (system migrations losing provenance) impose disproportionate cost because reification-validity semantics do not gracefully degrade --- reflected in the asymmetric-retargeting analysis. \textbf{For implementers in practice, this means maturity programs should aim for level parity within connected subgraphs of domains rather than maximizing one domain in isolation, and migration projects that risk losing provenance --- system replacements, cloud migrations, M\&A integrations, legacy decommissions --- should be flagged as material risks to the maturity portfolio and budgeted accordingly rather than treated as routine IT work that the privacy program absorbs.}
+
+\subsubsection{Maintenance and freshness as the largest cross-domain concern}
+
+\emph{We observed that maintenance and freshness mechanics is the single largest cross-domain concern} --- a byproduct of regulations and standards uniformly requiring ``kept up to date'' without prescribing how --- reflected as an originated \texttt{MaintenanceStatus} state machine plus the freshness triad (\texttt{lastReviewedAt}, \texttt{reviewCadenceDays}, \texttt{nextReviewDue}, \texttt{attestationRecord}, \texttt{reviewerIdentity}), introduced at L3, enforced at L4, automated at L5. \textbf{For implementers in practice, this means the freshness triad should be designed into every inventory and assessment at L3 even if review processes are not yet formalized; retrofitting this metadata at L4 is the single most expensive periphery overlay across the model, the most common cause of stalled L3~$\to$~L4 transitions, and the gap area where commercial tooling provides the least off-the-shelf support.}
+
+\subsection{Design issues observed in the DPV}
+
+\subsubsection{The vocabulary-vs-schema gap is intentional}
+
+\emph{We observed that the gap between vocabulary and schema is foundational and intentional} --- a byproduct of DPV publishing concept schemes with a deliberate hand-off (``can additionally be implemented \ldots appropriate to a use-case's specific requirements'') --- reflected in the eight foundational gaps (G1--G8) the Phase~1 characterisation identified. \textbf{For implementers in practice, this means privacy engineers should not expect DPV alone to provide a schema and should not lodge feature requests with DPVCG for what are deliberately out-of-scope concerns; the appropriate location for structural commitments is the reference-model layer or organizational implementation policies, and treating DPV adoption as sufficient produces the most common failure mode of ``we adopted DPV and still don't have an operating data model.''}
+
+\begin{itemize}
+    \item Soft-typed relationships, absent property domains, value taxonomies in place of state machines, and unspecified identity~/~cardinality~/~edge-metadata are scope decisions DPV made deliberately rather than omissions.
+\end{itemize}
+
+\subsubsection{Operational gaps fall into recurring categories}
+
+\emph{We observed that operational DPV gaps fall into a small number of recurring categories} --- a byproduct of structural implementation needs being patterned rather than per-domain-novel --- reflected in the categorisation of approximately 95 distinct DPV gaps under 14 sub-categories. \textbf{For implementers in practice, this means the gap categorisation can be used directly to prioritize architectural investment within an organization; the two largest gaps (maintenance/freshness mechanics, inventory-to-report view derivation) lack packaged solutions from prior art and therefore warrant dedicated internal engineering attention rather than vendor procurement, while smaller gap categories may be addressable through tooling configuration or organizational policy.}
+
+\begin{itemize}
+    \item The 14 sub-categories include identity and keys, cardinality and obligation, lifecycle and state transitions, temporal validity, edge-level provenance, category-level wrappers, per-activity role discriminator, association-class needs, document/record entities, cross-regime mapping, view-derivation, maintenance/freshness, effectiveness measurement, and the risk-incident closure loop.
+\end{itemize}
+
+\subsubsection{Several DPV design choices transfer cleanly}
+
+\emph{We observed that certain DPV design choices transfer cleanly without modification} --- a byproduct of DPV having already settled some modelling questions in ways that compose with implementation --- reflected in the patterns the reference model inherits unchanged: the modular core-plus-extension architecture; the unified \texttt{RiskConcept} with role-as-relation; status value taxonomies as ready-made enumerations; the recursive \texttt{dpv:Process} nesting as the granularity answer. \textbf{For implementers in practice, this means organizations can adopt these patterns directly without re-litigation: the modular extension architecture as the template for in-house regulation profiles; the role-as-relation pattern for organizational risk graphs; the recursive nesting pattern for processing-activity granularity policies. Reusing these battle-tested patterns reduces architectural debate cycles and ensures the in-house model composes cleanly with DPV-aligned tooling and downstream interoperability with community work.}
+
+\begin{itemize}
+    \item The work also established a layered division of labour: DPV stays the vocabulary layer; the regulation-agnostic core takes structural commitments; regulation profiles take regime-specific structure.
+\end{itemize}
+
+\subsubsection{Gap-fills map naturally to DPVCG contributions}
+
+\emph{We observed that gap-fills generated by the build map naturally to DPVCG contribution candidates} --- a byproduct of the gap-discovery process being driven by structural implementation rather than personal preference --- reflected in 13 packaged contribution candidates (C1--C13) organised into three submission batches aligned to the DPV~2.4 (July~2026) and 2.5 release cadence. \textbf{For implementers in practice, this means organizations that originate structural patterns during their own high-maturity programs --- particularly in areas the reference model flagged as gap candidates --- should consider contributing back through the documented DPVCG submission paths; this work has already mapped where such contributions would fit and which existing GitHub issues they would attach to, lowering the threshold for community contribution from individual implementing organizations and turning internal engineering effort into ecosystem-level value.}
+
+\begin{itemize}
+    \item Foundational reification proposals are batched first (\texttt{PartyRoleInActivity}, \texttt{LegalBasisAssignment}, \texttt{ConsentEvent}, category wrappers, \texttt{MaintenanceStatus}); schema additions next (LIA/TIA/CompatibilityAssessment, \texttt{Mitigation}, \texttt{EffectivenessReview}, \texttt{ImpactAssessment} polymorphism); cross-regime and projection last (jurisdiction-neutral \texttt{Appeal}, \texttt{NotificationObligation} lookup, view-derivation machinery, \texttt{Processing}~$\to$~\texttt{AIModel} inverse).
+    \item Several map directly to existing GitHub issues --- \#181 (settled precedent), \#282 (in-flight cross-regime notification), \#359 (versioning), \#388 (MLDCAT-AP alignment), \#410 (privacy signals) --- providing built-in submission paths rather than requiring new issue threads.
+\end{itemize}
 \subsection{Prerequisite Definitions}
     Key Points for this Section
     \begin{enumerate}
