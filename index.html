@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Reference Model — Interactive Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Tailwind theme override — design tokens.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            DEFAULT: '#0f7370',
+            hover: '#0a5e5b',
+            light: '#e8f1f0'
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'Menlo', 'monospace']
+        },
+        fontSize: {
+          xs:   ['11px', { lineHeight: '1.3' }],
+          sm:   ['12px', { lineHeight: '1.4' }],
+          base: ['13px', { lineHeight: '1.4' }],
+          md:   ['14px', { lineHeight: '1.4' }],
+          lg:   ['15px', { lineHeight: '1.4' }],
+          xl:   ['17px', { lineHeight: '1.4' }],
+          '2xl':['20px', { lineHeight: '1.3' }]
+        },
+        borderRadius: {
+          none: '0',
+          sm:   '4px',
+          DEFAULT: '4px',
+          md:   '4px',
+          lg:   '4px',
+          xl:   '4px',
+          '2xl':'4px',
+          '3xl':'4px',
+          full: '9999px' // kept for circular tooltip triggers / status dots only
+        }
+      }
+    }
+  };
+</script>
+<!-- Alpine is loaded dynamically by the MODEL loader so that x-data="explorer()" never evaluates against an empty MODEL. See the MODEL LOADER block near the bottom of this file. -->
+<script id="alpine-script-stub" data-src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/layout-base@2.0.1/layout-base.js"></script>
+<script src="https://unpkg.com/cose-base@2.2.0/cose-base.js"></script>
+<script src="https://unpkg.com/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
+<style>
+  html, body { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 13px; line-height: 1.4; color: #334155; background: #ffffff; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  .mono, .font-mono { font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, monospace; }
+
+  [x-cloak] { display: none !important; }
+  .fade-in { animation: fadeIn 0.18s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+  .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .truncate-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .highlight-row { animation: pulse 1.5s ease-out; }
+  @keyframes pulse { 0%, 100% { background-color: transparent; } 25% { background-color: #e8f1f0; } }
+
+  /* Cytoscape canvas */
+  #cy { width: 100%; height: 100%; background: #f8fafc; }
+  .graph-container { height: calc(100vh - 240px); min-height: 560px; }
+
+  /* Text badges (replaces old pill badges) — 4px radius, 1px border, no shadow */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  .badge-status {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .badge-accent { background: #e8f1f0; color: #0f7370; border-color: #c5dedc; }
+
+  /* Tooltip trigger (info-i) */
+  .tt-trigger {
+    display: inline-flex; align-items: center; justify-content: center;
+    vertical-align: middle; line-height: 0;
+    color: #94a3b8;
+    cursor: help;
+    border-radius: 9999px;
+    padding: 1px;
+    width: 14px; height: 14px;
+  }
+  .tt-trigger:hover, .tt-trigger:focus { color: #0f7370; outline: none; background: #e8f1f0; }
+  .tt-icon { width: 12px; height: 12px; }
+
+  /* Tooltip popover — white bg, 1px slate-200, 4px radius, subtle shadow only */
+  .tt-pop {
+    position: absolute; z-index: 50;
+    left: 50%; transform: translateX(-50%);
+    top: calc(100% + 6px);
+    min-width: 220px; max-width: 320px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.10);
+    pointer-events: none;
+    text-align: left;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0s linear 0.15s;
+  }
+  .tt-wrap:hover .tt-pop, .tt-wrap:focus-within .tt-pop {
+    opacity: 1; visibility: visible;
+    transition: opacity 0.15s ease, visibility 0s linear 0s;
+  }
+  .tt-pop strong { color: #0f172a; font-weight: 600; }
+  .tt-pop em { color: #475569; font-style: normal; font-weight: 500; }
+  .tt-pop.tt-right { left: auto; right: 0; transform: none; }
+  .tt-wrap { position: relative; display: inline-flex; align-items: center; }
+
+  .jargon { border-bottom: 1px dotted #94a3b8; cursor: help; }
+
+  /* Intro panel — neutral, no color */
+  .intro-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    border-radius: 4px;
+    padding: 12px 36px 12px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    position: relative;
+  }
+  .intro-panel .intro-dismiss {
+    position: absolute; top: 6px; right: 6px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px;
+    border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+  }
+  .intro-panel .intro-dismiss:hover { background: #e2e8f0; color: #0f172a; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    position: sticky; top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 14px 12px 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .sidebar-nav { padding: 8px 8px; flex: 1; }
+  .sidebar-nav button {
+    width: 100%;
+    text-align: left;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #334155;
+    border-left: 2px solid transparent;
+    background: transparent;
+    display: block;
+    border-radius: 0;
+  }
+  .sidebar-nav button:hover { background: #f1f5f9; }
+  .sidebar-nav button.active {
+    background: #e8f1f0;
+    color: #0f7370;
+    border-left-color: #0f7370;
+    font-weight: 500;
+  }
+  .sidebar-footer { padding: 8px 8px 16px 8px; border-top: 1px solid #e2e8f0; }
+  .sidebar-footer button {
+    width: 100%; text-align: left;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #64748b;
+    background: transparent;
+    border-radius: 4px;
+  }
+  .sidebar-footer button:hover { background: #f1f5f9; color: #0f172a; }
+
+  /* Table styling */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table thead th {
+    background: #f8fafc;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  .data-table tbody td {
+    padding: 6px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+  }
+  .data-table tbody tr:hover { background: #f8fafc; }
+  .data-table tbody tr.row-group td {
+    background: #f1f5f9;
+    font-weight: 600;
+    color: #0f172a;
+    padding: 8px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .table-wrap { border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; background: #ffffff; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #ffffff;
+  }
+  .filter-bar > .filter-field { display: flex; flex-direction: column; min-width: 140px; }
+  .filter-bar label.filter-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* Inputs */
+  .input, .select, select.select, input.input {
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #334155;
+    line-height: 1.4;
+    height: 28px;
+  }
+  .input:focus, .select:focus {
+    outline: none;
+    border-color: #0f7370;
+    box-shadow: 0 0 0 2px rgba(15, 115, 112, 0.15);
+  }
+  .input-narrow { min-width: 100px; }
+
+  /* Buttons */
+  .btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #334155;
+    line-height: 1.4;
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer;
+  }
+  .btn:hover { background: #f1f5f9; }
+  .btn-sm { padding: 3px 8px; font-size: 12px; }
+  .btn-accent {
+    background: #0f7370;
+    border-color: #0f7370;
+    color: #ffffff;
+  }
+  .btn-accent:hover { background: #0a5e5b; border-color: #0a5e5b; }
+  .btn-link {
+    background: transparent;
+    border: none;
+    color: #0f7370;
+    padding: 0;
+    height: auto;
+  }
+  .btn-link:hover { color: #0a5e5b; text-decoration: underline; }
+
+  /* Checkbox / radio rows */
+  .check-row {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #334155;
+  }
+  .check-row input[type="checkbox"], .check-row input[type="radio"] {
+    accent-color: #0f7370;
+  }
+
+  /* Range slider */
+  input[type="range"] { accent-color: #0f7370; }
+
+  /* Cost dots */
+  .cost-dots { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 13px; letter-spacing: 1px; }
+  .cost-dots .filled { color: #334155; }
+  .cost-dots .empty { color: #cbd5e1; }
+
+  /* Definition list */
+  .dl-stats {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    font-size: 13px;
+  }
+  .dl-stats dt { color: #475569; }
+  .dl-stats dd { color: #0f172a; font-family: 'JetBrains Mono', Menlo, monospace; font-weight: 500; }
+
+  /* Loading / error overlays */
+  .model-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.92);
+  }
+  .model-loading-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 20px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    color: #334155;
+    font-size: 13px;
+  }
+  .model-spinner {
+    width: 20px; height: 20px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #0f7370;
+    border-radius: 50%;
+    animation: model-spin 0.8s linear infinite;
+  }
+  @keyframes model-spin { to { transform: rotate(360deg); } }
+
+  /* Graph toolbar */
+  .graph-toolbar {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #ffffff;
+  }
+  .graph-toolbar-group {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 10px 14px;
+    border-right: 1px solid #e2e8f0;
+  }
+  .graph-toolbar-group:last-child { border-right: none; }
+  .graph-toolbar-group .group-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+  .graph-toolbar-group .group-body { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* Legend dots */
+  .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 9999px; }
+  .legend-tri { display: inline-block; width: 0; height: 0;
+    border-left: 5px solid transparent; border-right: 5px solid transparent;
+    border-bottom: 8px solid currentColor; }
+
+  /* Tightening cell — monospace level marker */
+  .level-marker { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 12px; color: #334155; }
+
+  /* Detail panel for graph */
+  .graph-detail {
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  /* Layout helper: top-level flex */
+  .app-shell { display: flex; min-height: 100vh; background: #ffffff; }
+  .app-main { flex: 1; min-width: 0; padding: 16px 24px; }
+
+  /* Generic icon button */
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; color: #64748b; cursor: pointer; background: transparent; border: none; }
+  .icon-btn:hover { background: #f1f5f9; color: #0f172a; }
+
+  /* Section spacing helpers */
+  .section { display: flex; flex-direction: column; gap: 16px; }
+
+  /* Page intro heading row */
+  .page-title { font-size: 17px; font-weight: 600; color: #0f172a; }
+  .page-desc { font-size: 13px; color: #475569; max-width: 760px; }
+
+  /* Code chip inline */
+  code.inline-code {
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 12px;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+
+  /* Detail section heading */
+  .h-section { font-size: 14px; font-weight: 600; color: #0f172a; }
+  .h-sub { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+
+  /* Two-column section grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Small panel (used in domain detail) */
+  .sub-panel {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 12px;
+    background: #ffffff;
+  }
+  .sub-panel h4 { margin: 0 0 8px 0; }
+
+  /* Inline button-as-text link */
+  .text-link { color: #0f7370; cursor: pointer; }
+  .text-link:hover { color: #0a5e5b; text-decoration: underline; }
+
+  /* Cytoscape legend inside canvas */
+  .cy-legend {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 11px;
+    color: #475569;
+    line-height: 1.5;
+    max-width: 280px;
+  }
+  .cy-hint {
+    position: absolute; bottom: 8px; left: 8px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: #64748b;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body class="font-sans text-base text-slate-700 bg-white" x-data="explorer()" x-init="init()">
+
+<!-- Loading overlay (shown while data/model.json is being fetched) -->
+<div id="model-loading-overlay" class="model-overlay">
+  <div class="model-loading-box">
+    <div class="model-spinner" aria-hidden="true"></div>
+    <div>Loading reference model&hellip;</div>
+  </div>
+</div>
+
+<!-- Error overlay (shown if fetch fails; hidden by default) -->
+<div id="model-error-overlay" class="model-overlay" style="display: none;">
+  <div class="bg-white border border-slate-200 rounded p-6 text-slate-700" style="max-width: 640px; margin: 0 24px;">
+    <div class="flex items-start gap-3 mb-3">
+      <svg class="w-4 h-4 text-slate-700 flex-shrink-0 mt-0.5" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7.86 2L1.13 13.41a1 1 0 0 0 .86 1.5h12.02a1 1 0 0 0 .86-1.5L8.14 2a.32.32 0 0 0-.28-.16Z"/>
+        <line x1="8" y1="6" x2="8" y2="9"/>
+        <line x1="8" y1="12" x2="8" y2="12"/>
+      </svg>
+      <div class="font-semibold text-slate-900 text-md">Unable to load reference model data.</div>
+    </div>
+    <p class="text-base mb-3">
+      This Explorer fetches its data from <code class="inline-code">data/model.json</code> at startup. If you opened this file directly (via <code class="inline-code">file://</code>), most browsers block local file fetches. Serve the folder over HTTP instead &mdash; for example, from the <code class="inline-code">deliverables</code> directory run:
+    </p>
+    <pre class="font-mono text-sm bg-slate-50 border border-slate-200 text-slate-700 rounded p-3 mb-3 overflow-x-auto">python -m http.server</pre>
+    <p class="text-base mb-3">
+      and then open <code class="inline-code">http://localhost:8000/Interactive%20Explorer.html</code>.
+    </p>
+    <p class="text-base mb-4">
+      When deployed via GitHub Pages or any static host, this works without configuration.
+    </p>
+    <div class="border-t border-slate-200 pt-3">
+      <div class="h-sub mb-1">Error detail</div>
+      <pre id="model-error-detail" class="font-mono text-xs text-slate-700 whitespace-pre-wrap break-all"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- APP SHELL: sidebar + main                                                -->
+<!-- ====================================================================== -->
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="text-md font-semibold text-slate-900 leading-tight">Reference Model</div>
+      <div class="text-xs text-slate-500 leading-tight mt-1">Interactive Explorer</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Primary">
+      <template x-for="v in views" :key="v.id">
+        <button @click="setView(v.id)"
+                :class="view === v.id ? 'active' : ''"
+                x-text="v.label"></button>
+      </template>
+    </nav>
+    <div class="sidebar-footer">
+      <button @click="showAllIntros()" title="Re-show every dismissed page intro">Show intros</button>
+    </div>
+  </aside>
+
+  <main class="app-main">
+
+  <!-- =================== HOME =================== -->
+  <section x-show="view === 'home'" x-cloak class="fade-in section">
+    <div x-show="intros.home" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('home')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      This is the <strong>Interactive Explorer</strong> for an implementation-ready reference data model for privacy programs, inspired by W3C DPV. Use the sidebar to browse the 12 capability areas, the entity and relationship catalogs, the risk-discretionary decisions, the maturity delta map, or the spatial graph. The model is regulation-agnostic at its core and indexed by your target CMMI maturity level per domain. Now at <strong>v1.0</strong> (2026-07-04, v1.1 Option A expansion 2026-07-05): 52 core entities, 96 core relationships, 2 marker classes, 102 rework points (42 original L3→L4 + 26 v1.0 cross-cutting + 34 Option A per-domain expansion across L1→L2, L2→L3, L4→L5), and 15 Charter decisions D1–D15. Every rework point is tagged with a costCategory (structural-retrofit / spine-assembly / register-establishment / operational-automation / cross-cutting-declaration) so the schema-rework surface (structural-retrofit + spine-assembly = 69 items) is distinguishable from register-existence and automation work. Hover the small info icons on any control to see a short explanation, or hover any <span class="jargon">dotted term</span> in body text for its definition.
+    </div>
+
+    <div>
+      <h1 class="page-title">An implementation-ready privacy data model</h1>
+      <p class="page-desc mt-2">A regulation-agnostic
+        <span class="tt-wrap"><span tabindex="0" class="jargon">core spine</span><span class="tt-pop" role="tooltip"><strong>Core / spine.</strong> The non-negotiable backbone of the model. Every implementation has these entities and relationships, at every maturity level.</span></span>,
+        <span class="tt-wrap"><span tabindex="0" class="jargon">profile overlays</span><span class="tt-pop" role="tooltip"><strong>Regulation profile.</strong> A regulation-specific overlay that sits on top of the regulation-agnostic core. The core stays jurisdiction-neutral; the profile attaches mandatory fields, named instances, and report templates a specific regulation requires.</span></span>,
+        <span class="tt-wrap"><span tabindex="0" class="jargon">maturity-gated</span><span class="tt-pop" role="tooltip"><strong>Maturity-gated.</strong> Only required as your privacy program becomes more mature. The reference model adds these structures as you advance through CMMI levels.</span></span> periphery, and
+        <span class="tt-wrap"><span tabindex="0" class="jargon">risk-discretionary</span><span class="tt-pop" role="tooltip"><strong>Risk-discretionary.</strong> Defensible either way. The right choice depends on your organization's risk tolerance for that domain.</span></span> decisions — organized across twelve privacy
+        <span class="tt-wrap"><span tabindex="0" class="jargon">capability domains</span><span class="tt-pop" role="tooltip"><strong>Capability area (domain).</strong> One of the 12 privacy program functions the model decomposes — for example, Processing Inventory, Consent Management, Risk Assessment. Each can have its own maturity level.</span></span> and the five
+        <span class="tt-wrap"><span tabindex="0" class="jargon">CMMI capability levels</span><span class="tt-pop" role="tooltip"><strong>CMMI levels.</strong> L1 Initial (ad-hoc), L2 Managed (a register exists), L3 Defined (the spine is assembled), L4 Quantitatively Managed (versioned, time-bound, evidence-tracked), L5 Optimizing (continuous, automated).</span></span>.
+      </p>
+    </div>
+
+    <!-- Headline stats — definition list, not cards -->
+    <div>
+      <div class="h-sub mb-2">Model at a glance</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <tbody>
+            <template x-for="s in stats" :key="s.label">
+              <tr>
+                <td class="text-slate-600" style="width: 60%;" x-text="s.label"></td>
+                <td class="font-mono text-slate-900 font-medium" x-text="s.value"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Call to action — jumps to the spatial graph -->
+    <div class="mt-6 flex justify-center">
+      <button @click="setView('graph')" class="btn btn-accent" style="padding: 12px 28px; font-size: 16px; font-weight: 600;">
+        Click to view the Reference Data Model
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="6 4 10 8 6 12"/></svg>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- =================== DOMAINS =================== -->
+  <section x-show="view === 'domains'" x-cloak class="fade-in section">
+    <div x-show="intros.domains" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('domains')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      The reference model decomposes privacy programs into <strong>12 capability areas</strong>. The table below shows what each area covers and where it sits in the model (deeply modeled, lightly modeled, or interface-only). Click any row to drill into the entities, decisions, profile overlays, joins, and maturity ladder specific to that area.
+    </div>
+
+    <div x-show="!selectedDomain">
+      <div>
+        <h1 class="page-title">Domain browser</h1>
+        <p class="page-desc mt-2">Twelve privacy
+          <span class="tt-wrap"><span tabindex="0" class="jargon">capability areas</span><span class="tt-pop" role="tooltip"><strong>Capability area (domain).</strong> One of the 12 privacy program functions the model decomposes — e.g., Processing Inventory, Consent Management, Risk Assessment. Each can have its own maturity level.</span></span>.
+          Click a row to drill in.
+        </p>
+      </div>
+
+      <div class="table-wrap mt-4">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">ID</th>
+              <th>Name</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="d in MODEL.domains" :key="d.id">
+              <tr @click="selectedDomain = d" class="cursor-pointer">
+                <td class="font-mono text-slate-600">#<span x-text="d.id"></span></td>
+                <td class="text-slate-900 font-medium" x-text="d.name"></td>
+                <td class="text-slate-600 truncate-2" x-text="d.description"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Domain detail -->
+    <div x-show="selectedDomain" x-cloak class="fade-in section">
+      <button @click="selectedDomain = null" class="btn btn-sm self-start">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 4 6 8 10 12"/></svg>
+        All domains
+      </button>
+
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="font-mono text-sm text-slate-500">Domain #<span x-text="selectedDomain && selectedDomain.id"></span></span>
+        </div>
+        <h2 class="page-title" x-text="selectedDomain && selectedDomain.name"></h2>
+        <p class="text-slate-700 mt-2" x-text="selectedDomain && selectedDomain.description"></p>
+        <div x-show="selectedDomain && selectedDomain.dpvAnchor" class="text-sm text-slate-500 mt-2">
+          DPV anchor: <span class="font-mono text-slate-700" x-text="selectedDomain && selectedDomain.dpvAnchor"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="sub-panel">
+          <h4 class="h-section">Core entities (this domain)</h4>
+          <table class="data-table">
+            <tbody>
+              <template x-for="eid in (selectedDomain ? selectedDomain.entityIds : [])" :key="eid">
+                <tr>
+                  <td class="font-mono text-sm text-slate-600" style="width: 90px;"><button @click="jumpToEntity(eid)" class="text-link" x-text="eid"></button></td>
+                  <td class="text-slate-700" x-text="entityName(eid)"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="sub-panel">
+          <h4 class="h-section">Key decisions</h4>
+          <table class="data-table">
+            <tbody>
+              <template x-for="did in (selectedDomain ? selectedDomain.decisionIds : [])" :key="did">
+                <tr>
+                  <td class="font-mono text-sm text-slate-600" style="width: 90px;"><button @click="jumpToDecision(did)" class="text-link" x-text="did"></button></td>
+                  <td class="text-slate-700" x-text="decisionTitle(did)"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="sub-panel">
+          <h4 class="h-section">
+            <span class="tt-wrap"><span tabindex="0" class="jargon">Profile overlays</span><span class="tt-pop" role="tooltip"><strong>Regulation profile.</strong> A regulation-specific overlay on top of the regulation-agnostic core. Each chip is a profile whose mandatory fields, named instances, or report templates touch this domain.</span></span>
+          </h4>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <template x-for="p in (selectedDomain ? selectedDomain.profiles : [])" :key="p">
+              <span class="badge badge-accent" x-text="p"></span>
+            </template>
+            <span x-show="selectedDomain && selectedDomain.profiles.length === 0" class="text-sm text-slate-500">No profile overlays touch this domain.</span>
+          </div>
+        </div>
+
+        <div class="sub-panel">
+          <h4 class="h-section">
+            <span class="tt-wrap"><span tabindex="0" class="jargon">Cross-domain joins</span><span class="tt-pop" role="tooltip"><strong>Cross-domain join.</strong> A relationship that spans two capability areas. These show how the 12 areas connect into one coherent model.</span></span>
+          </h4>
+          <div class="text-slate-700 mt-2" x-text="selectedDomain && selectedDomain.joinCount + ' joins (J-IDs) realized'"></div>
+          <div class="text-sm text-slate-500 mt-1" x-show="selectedDomain && selectedDomain.keyJoins" x-text="selectedDomain && selectedDomain.keyJoins"></div>
+        </div>
+      </div>
+
+      <div class="sub-panel">
+        <h4 class="h-section">
+          <span class="tt-wrap"><span tabindex="0" class="jargon">Maturity ladder</span><span class="tt-pop" role="tooltip"><strong>Maturity ladder.</strong> What changes in this domain between adjacent CMMI levels. The L3→L4 step typically dominates the cost, because it adds versioning, immutability, valid-from/to, and edge-level evidence.</span></span>
+        </h4>
+        <p class="text-slate-700 mt-2 mb-3" x-text="selectedDomain && selectedDomain.maturityNote"></p>
+        <button @click="setView('maturity'); maturityDomain = selectedDomain ? selectedDomain.id : 1; selectedDomain = null" class="btn btn-sm">
+          Open maturity delta map for this domain
+          <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 4 10 8 6 12"/></svg>
+        </button>
+      </div>
+
+      <div x-show="selectedDomain && selectedDomain.leverage" class="sub-panel">
+        <h4 class="h-section">Leverage observation</h4>
+        <p class="text-slate-700 mt-2" x-text="selectedDomain && selectedDomain.leverage"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== ENTITIES =================== -->
+  <section x-show="view === 'entities'" x-cloak class="fade-in section">
+    <div x-show="intros.entities" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('entities')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      An <strong>entity</strong> is a thing the model represents — a Processing Activity, a Consent Record, a Personal Data Category, and so on. Filter by capability area, status, maturity, or regulation profile to narrow the list. Click any row to expand the full definition.
+    </div>
+
+    <div>
+      <h1 class="page-title">Entity catalog</h1>
+      <p class="page-desc mt-2">
+        <span class="tt-wrap"><span tabindex="0" class="jargon">Core</span><span class="tt-pop" role="tooltip"><strong>Core / spine.</strong> The non-negotiable backbone of the model. Every implementation has these entities and relationships, at every maturity level.</span></span>
+        entities (C-Exx) plus per-domain originated entities. Click a row for full definition.
+      </p>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-field" style="min-width: 200px;">
+        <label class="filter-label">
+          Search
+          <span class="tt-wrap">
+            <span tabindex="0" class="tt-trigger" aria-label="What does Search filter?">
+              <svg class="tt-icon" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="14" y1="14" x2="10.5" y2="10.5"/></svg>
+            </span>
+            <span class="tt-pop" role="tooltip"><strong>Search.</strong> Match against entity name (e.g., "ProcessingActivity") or ID (e.g., "C-E01"). Case-insensitive.</span>
+          </span>
+        </label>
+        <input type="text" x-model="entityFilters.search" placeholder="Name or ID…" class="input">
+      </div>
+      <div class="filter-field" style="min-width: 220px;">
+        <label class="filter-label">
+          Domain
+          <span class="tt-wrap">
+            <span tabindex="0" class="tt-trigger" aria-label="What is a domain?">
+              <svg class="tt-icon" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
+            </span>
+            <span class="tt-pop" role="tooltip"><strong>Capability area (domain).</strong> One of the 12 privacy program functions the model decomposes. Filter to entities originating in a particular area.</span>
+          </span>
+        </label>
+        <select x-model="entityFilters.domain" class="select">
+          <option value="">All domains</option>
+          <template x-for="d in MODEL.domains" :key="d.id">
+            <option :value="d.id" x-text="'#' + d.id + ' — ' + d.name"></option>
+          </template>
+        </select>
+      </div>
+      <div class="filter-field" style="min-width: 280px;">
+        <label class="filter-label">
+          Status
+          <span class="tt-wrap">
+            <span tabindex="0" class="tt-trigger" aria-label="What do statuses mean?">
+              <svg class="tt-icon" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
+            </span>
+            <span class="tt-pop" role="tooltip"><strong>Status.</strong> Where an entity sits in the model: <em>core</em> = on the spine; <em>maturity-gated</em> = added at L2/L3/L4/L5; <em>risk-discretionary</em> = defensible either way; <em>interface</em> = stub connecting to a more specialized model.</span>
+          </span>
+        </label>
+        <div class="flex flex-wrap gap-3 mt-1">
+          <template x-for="s in ['core', 'maturity-gated', 'risk-discretionary', 'interface']" :key="s">
+            <label class="check-row">
+              <input type="checkbox" :value="s" x-model="entityFilters.status">
+              <span x-text="s"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+      <div class="filter-field" style="min-width: 200px;">
+        <label class="filter-label">
+          Min maturity: L<span x-text="entityFilters.minLevel"></span>
+          <span class="tt-wrap">
+            <span tabindex="0" class="tt-trigger" aria-label="What is a CMMI maturity level?">
+              <svg class="tt-icon" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
+            </span>
+            <span class="tt-pop tt-right" role="tooltip"><strong>CMMI maturity level.</strong> L1 Initial, L2 Managed, L3 Defined, L4 Quantitatively Managed, L5 Optimizing. Drag to show only entities at or above this level.</span>
+          </span>
+        </label>
+        <input type="range" min="1" max="5" x-model.number="entityFilters.minLevel" class="w-full" style="height: 28px;">
+      </div>
+    </div>
+
+    <div class="text-sm text-slate-500">Showing <span class="text-slate-700 font-medium" x-text="filteredEntities().length"></span> of <span x-text="MODEL.entities.length"></span> entities</div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">
+              <span class="tt-wrap"><span tabindex="0">ID</span><span class="tt-pop" role="tooltip"><strong>ID.</strong> Stable identifier. C-Exx = core entity; Dn-Exx = entity originating in domain n.</span></span>
+            </th>
+            <th style="width: 180px;">Name</th>
+            <th>Definition</th>
+            <th style="width: 110px;">
+              <span class="tt-wrap"><span tabindex="0">Domain</span><span class="tt-pop" role="tooltip"><strong>Domain.</strong> The capability area(s) this entity belongs to.</span></span>
+            </th>
+            <th style="width: 130px;">
+              <span class="tt-wrap"><span tabindex="0">Status</span><span class="tt-pop" role="tooltip"><strong>Status.</strong> <em>core</em>, <em>maturity-gated</em>, <em>risk-discretionary</em>, or <em>interface</em>.</span></span>
+            </th>
+            <th style="width: 70px;">
+              <span class="tt-wrap"><span tabindex="0">Maturity</span><span class="tt-pop" role="tooltip"><strong>Maturity.</strong> The lowest CMMI level at which this entity is required.</span></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="e in filteredEntities()" :key="e.id">
+            <tr @click="toggleEntity(e.id)" class="cursor-pointer" :id="'entity-' + e.id" :class="highlightedEntity === e.id ? 'highlight-row' : ''">
+              <td class="font-mono text-sm text-slate-600 whitespace-nowrap" x-text="e.id"></td>
+              <td class="text-slate-900 font-medium whitespace-nowrap" x-text="e.name"></td>
+              <td class="text-slate-600">
+                <div x-show="expandedEntity !== e.id" class="truncate-2" x-text="e.definition"></div>
+                <div x-show="expandedEntity === e.id" class="fade-in" x-text="e.definition"></div>
+              </td>
+              <td>
+                <template x-for="d in e.domains" :key="d">
+                  <button @click.stop="jumpToDomain(d)" class="badge mr-1 cursor-pointer hover:bg-accent-light" x-text="'#' + d"></button>
+                </template>
+              </td>
+              <td><span class="badge badge-status" x-text="e.status"></span></td>
+              <td class="text-sm text-slate-600 whitespace-nowrap" x-text="e.maturity"></td>
+            </tr>
+          </template>
+          <tr x-show="filteredEntities().length === 0">
+            <td colspan="6" class="text-center text-slate-400 py-6">No entities match the current filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =================== RELATIONSHIPS =================== -->
+  <section x-show="view === 'relationships'" x-cloak class="fade-in section">
+    <div x-show="intros.relationships" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('relationships')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      A <strong>relationship</strong> connects two entities — for example, a Processing Activity uses Personal Data and pursues a Purpose. Each row shows the from/to entities, the cardinality, whether it is mandatory, and whether DPV already has a property for it.
+    </div>
+
+    <div>
+      <h1 class="page-title">Relationship catalog</h1>
+      <p class="page-desc mt-2">
+        <span class="tt-wrap"><span tabindex="0" class="jargon">Core</span><span class="tt-pop" role="tooltip"><strong>Core / spine.</strong> The non-negotiable backbone. Every implementation has these relationships at every maturity level.</span></span>
+        relationships (C-Rxx) with
+        <span class="tt-wrap"><span tabindex="0" class="jargon">cardinality</span><span class="tt-pop" role="tooltip"><strong>Cardinality.</strong> How many entities can appear on each side. <em>1..1</em>, <em>1..N</em>, <em>0..1</em>, <em>0..N</em>, <em>N..M</em>.</span></span>
+        and
+        <span class="tt-wrap"><span tabindex="0" class="jargon">obligation</span><span class="tt-pop" role="tooltip"><strong>Obligation.</strong> <em>Mandatory</em>, <em>Conditional</em>, or <em>Optional</em>.</span></span>.
+      </p>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-field" style="min-width: 200px;">
+        <label class="filter-label">Search</label>
+        <input type="text" x-model="relFilters.search" placeholder="Name or ID…" class="input">
+      </div>
+      <div class="filter-field" style="min-width: 200px;">
+        <label class="filter-label">Source entity</label>
+        <input type="text" x-model="relFilters.from" placeholder="Domain entity…" class="input">
+      </div>
+      <div class="filter-field" style="min-width: 140px;">
+        <label class="filter-label">Cardinality</label>
+        <select x-model="relFilters.card" class="select">
+          <option value="">All</option>
+          <option value="1..1">1..1</option>
+          <option value="1..N">1..N</option>
+          <option value="0..1">0..1</option>
+          <option value="0..N">0..N</option>
+          <option value="N..M">N..M</option>
+        </select>
+      </div>
+      <div class="filter-field" style="min-width: 160px;">
+        <label class="filter-label">Obligation</label>
+        <select x-model="relFilters.obl" class="select">
+          <option value="">All</option>
+          <option value="Mandatory">Mandatory</option>
+          <option value="Conditional">Conditional</option>
+          <option value="Optional">Optional</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="text-sm text-slate-500">Showing <span class="text-slate-700 font-medium" x-text="filteredRels().length"></span> of <span x-text="MODEL.relationships.length"></span> relationships</div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">ID</th>
+            <th style="width: 200px;">Relationship</th>
+            <th>From</th>
+            <th>To</th>
+            <th style="width: 70px;">Card.</th>
+            <th style="width: 100px;">Oblig.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="r in filteredRels()" :key="r.id">
+            <tr>
+              <td class="font-mono text-sm text-slate-600 whitespace-nowrap" x-text="r.id"></td>
+              <td class="font-mono text-sm text-slate-900 whitespace-nowrap" x-text="r.name"></td>
+              <td class="text-slate-700" x-text="r.from"></td>
+              <td class="text-slate-700" x-text="r.to"></td>
+              <td class="font-mono text-sm text-slate-700 whitespace-nowrap" x-text="r.card"></td>
+              <td class="text-slate-700" x-text="r.obligation"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =================== DECISIONS =================== -->
+  <section x-show="view === 'decisions'" x-cloak class="fade-in section">
+    <div x-show="intros.decisions" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('decisions')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      The reference model exposes <strong>40 risk-discretionary decisions</strong> (R4C-01 through R4C-40). Each is a point where multiple options are defensible at lower maturity levels and the choice depends on your organization's risk tolerance. The "options and basic considerations" column contextualizes each decision point in two sentences. Two decisions are <em>resolved</em> at v1.0: R4C-11 (Assessment polymorphism) via Charter D14, and R4C-12 (TOM theme classification) via Charter D15. Both rows are retained as historical rationale.
+    </div>
+
+    <div>
+      <h1 class="page-title">Decision catalog</h1>
+      <p class="page-desc mt-2">40
+        <span class="tt-wrap"><span tabindex="0" class="jargon">risk-discretionary</span><span class="tt-pop" role="tooltip"><strong>Risk-discretionary.</strong> Defensible either way; depends on your organization's risk tolerance.</span></span>
+        decisions where multiple defensible options exist. The model commits a default recommendation and shows how it tightens at higher maturity.</p>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-field" style="min-width: 200px;">
+        <label class="filter-label">Search</label>
+        <input type="text" x-model="decFilters.search" placeholder="Title or ID…" class="input">
+      </div>
+      <div class="filter-field" style="min-width: 220px;">
+        <label class="filter-label">Domain</label>
+        <select x-model="decFilters.domain" class="select">
+          <option value="">All</option>
+          <template x-for="d in MODEL.domains" :key="d.id">
+            <option :value="d.id" x-text="'#' + d.id + ' — ' + d.name"></option>
+          </template>
+        </select>
+      </div>
+    </div>
+
+    <div class="text-sm text-slate-500">Showing <span class="text-slate-700 font-medium" x-text="filteredDecisions().length"></span> of <span x-text="MODEL.decisions.length"></span> decisions</div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 90px;">ID</th>
+            <th style="width: 260px;">Decision point</th>
+            <th style="width: 120px;">Domains</th>
+            <th>Options and basic considerations</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="d in filteredDecisions()" :key="d.id">
+            <tr :id="'decision-' + d.id" :class="highlightedDecision === d.id ? 'highlight-row' : ''">
+              <td class="font-mono text-sm text-slate-700 whitespace-nowrap" x-text="d.id"></td>
+              <td class="text-slate-900 font-medium" x-text="d.title"></td>
+              <td>
+                <template x-for="dom in d.domains" :key="dom">
+                  <button @click.stop="jumpToDomain(dom)" class="badge mr-1 cursor-pointer hover:bg-accent-light" x-text="'#' + dom"></button>
+                </template>
+              </td>
+              <td class="text-slate-700" x-text="decisionContext(d)"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =================== MATURITY =================== -->
+  <section x-show="view === 'maturity'" x-cloak class="fade-in section">
+    <div x-show="intros.maturity" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('maturity')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      This view shows what changes between adjacent <strong>CMMI levels</strong> for each capability area. The rework catalog at v1.1 covers all four transitions with 102 entries: <strong>49 L3→L4</strong> (the multiplicative structural-retrofit cost — every reified association and accountability artefact gains temporal validity, immutable history, edge provenance, versioning, and attestation), <strong>20 L2→L3</strong> (spine-assembly — typed entities and reified associations introduced per domain), <strong>15 L1→L2</strong> (register-establishment plus 2 cross-cutting class declarations), and <strong>18 L4→L5</strong> (operational-automation — observability, integration, and cryptographic infrastructure built on the L4 data structure). Every entry is tagged with a costCategory: the 49 + 20 = 69 structural-retrofit and spine-assembly items are the schema-rework surface adopters should plan for; the 13 register-establishment and 18 operational-automation items are separate cost lines.
+    </div>
+
+    <div>
+      <h1 class="page-title">Maturity delta map</h1>
+      <p class="page-desc mt-2">Per-domain structural delta between adjacent
+        <span class="tt-wrap"><span tabindex="0" class="jargon">CMMI capability levels</span><span class="tt-pop" role="tooltip"><strong>CMMI levels.</strong> L1 Initial, L2 Managed, L3 Defined, L4 Quantitatively Managed, L5 Optimizing. L3→L4 is the costliest jump.</span></span>
+        with effort ratings.</p>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-field" style="min-width: 280px;">
+        <label class="filter-label">Domain</label>
+        <select x-model="maturityDomain" class="select">
+          <option value="all">All domains</option>
+          <template x-for="d in MODEL.domains" :key="d.id">
+            <option :value="d.id" x-text="'#' + d.id + ' — ' + d.name"></option>
+          </template>
+        </select>
+      </div>
+      <div class="filter-field" style="min-width: 320px;">
+        <label class="filter-label">Transition</label>
+        <div class="flex gap-1">
+          <button @click="maturityTransition = 'all'"
+                  :class="maturityTransition === 'all' ? 'btn btn-sm btn-accent' : 'btn btn-sm'">All</button>
+          <template x-for="t in ['L1→L2', 'L2→L3', 'L3→L4', 'L4→L5']" :key="t">
+            <button @click="maturityTransition = t"
+                    :class="maturityTransition === t ? 'btn btn-sm btn-accent' : 'btn btn-sm'"
+                    x-text="t"></button>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <div x-show="currentDomain() && currentDomain().leverage" class="sub-panel">
+      <span class="h-sub">Leverage observation:</span>
+      <span class="text-slate-700" x-text="currentDomain() && currentDomain().leverage"></span>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <div class="h-sub">
+        <span x-text="maturityDomain === 'all' ? 'All domains' : ('Domain #' + maturityDomain)"></span> ·
+        <span x-text="maturityTransition === 'all' ? 'All transitions' : maturityTransition"></span> deltas
+      </div>
+      <div class="text-sm text-slate-500"><span x-text="currentDeltas().length"></span> items</div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th x-show="maturityDomain === 'all'" style="width: 100px;">
+              <span class="tt-wrap"><span tabindex="0">Domain</span><span class="tt-pop" role="tooltip"><strong>Domain.</strong> The capability area this delta belongs to.</span></span>
+            </th>
+            <th x-show="maturityTransition === 'all'" style="width: 90px;">
+              <span class="tt-wrap"><span tabindex="0">Transition</span><span class="tt-pop" role="tooltip"><strong>Transition.</strong> Which CMMI level jump this delta belongs to.</span></span>
+            </th>
+            <th>
+              <span class="tt-wrap"><span tabindex="0">Delta</span><span class="tt-pop" role="tooltip"><strong>Delta.</strong> A single structural change required to move from one CMMI level to the next.</span></span>
+            </th>
+            <th style="width: 120px;">
+              <span class="tt-wrap"><span tabindex="0">Type</span><span class="tt-pop" role="tooltip"><strong>Type.</strong> <em>entity</em>, <em>relationship</em>, <em>attribute</em>, <em>state</em>, or <em>rule</em>.</span></span>
+            </th>
+            <th style="width: 80px;">
+              <span class="tt-wrap"><span tabindex="0">Effort</span><span class="tt-pop" role="tooltip"><strong>Effort.</strong> Rough effort to implement, shown as 1–3 dots.</span></span>
+            </th>
+            <th style="width: 180px;">
+              <span class="tt-wrap"><span tabindex="0">Prerequisite</span><span class="tt-pop" role="tooltip"><strong>Prerequisite.</strong> Other domain levels that must be in place first.</span></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="(d, i) in currentDeltas()" :key="i">
+            <tr>
+              <td x-show="maturityDomain === 'all'" class="text-slate-700 whitespace-nowrap" x-text="d._domainLabel || ''"></td>
+              <td x-show="maturityTransition === 'all'" class="font-mono text-sm text-slate-700 whitespace-nowrap" x-text="d._transitionLabel || ''"></td>
+              <td class="text-slate-700" x-text="d.delta"></td>
+              <td class="text-slate-700" x-text="d.type"></td>
+              <td>
+                <span class="cost-dots" :title="d.cost" x-html="costDots(d.cost)"></span>
+              </td>
+              <td class="text-sm text-slate-500" x-text="d.prereq || 'none'"></td>
+            </tr>
+          </template>
+          <tr x-show="currentDeltas().length === 0">
+            <td :colspan="4 + (maturityDomain === 'all' ? 1 : 0) + (maturityTransition === 'all' ? 1 : 0)" class="text-center text-slate-400 py-6">No deltas recorded for this transition.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =================== GRAPH =================== -->
+  <section x-show="view === 'graph'" x-cloak class="fade-in section">
+    <div x-show="intros.graph" x-transition.opacity class="intro-panel">
+      <button @click="dismissIntro('graph')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+      </button>
+      A <strong>spatial view</strong> of the model. Toggle layers to add or remove detail (core spine / per-domain entities / cross-domain joins). Click a node to focus on its neighborhood. Use the focus-mode toggle to switch between dimming the rest and isolating with relayout. Node color encodes capability area; node size encodes status; thick borders mark entities with a DPV mapping; dashed borders mark DPV gaps.
+    </div>
+
+    <div>
+      <h1 class="page-title">Spatial graph</h1>
+      <p class="page-desc mt-2">Force-directed view of the data model. Toggle layers, filter, and click nodes to explore.</p>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
+      <div>Nodes: <span class="text-slate-900 font-medium" x-text="graphStats.nodes"></span></div>
+      <div>Edges: <span class="text-slate-900 font-medium" x-text="graphStats.edges"></span></div>
+      <div>Focus: <span class="text-accent font-medium" x-text="graphFocusLabel()"></span></div>
+      <div>Layout: <span class="text-slate-700 font-medium" x-text="graph.layout"></span></div>
+    </div>
+
+    <!-- Compact horizontal toolbar -->
+    <div class="graph-toolbar">
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">Search</span>
+        <div class="group-body">
+          <input type="text" x-model="graph.search" @input="applyGraphSearch()" placeholder="Entity name…" class="input" style="width: 180px;">
+          <button x-show="graph.search" @click="graph.search = ''; applyGraphSearch()" class="icon-btn" title="Clear">
+            <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">Filters</span>
+        <div class="group-body">
+          <select x-model="graph.domain" @change="rebuildGraph()" class="select" style="width: 180px;">
+            <option value="">All domains</option>
+            <template x-for="d in MODEL.domains" :key="d.id">
+              <option :value="d.id" x-text="'#' + d.id + ' — ' + d.name"></option>
+            </template>
+          </select>
+        </div>
+        <div class="group-body mt-1">
+          <span class="text-xs text-slate-500">Max L<span x-text="graph.maxLevel"></span></span>
+          <input type="range" min="1" max="5" x-model.number="graph.maxLevel" @change="rebuildGraph()" style="width: 100px;">
+        </div>
+      </div>
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">Status</span>
+        <div class="group-body" style="gap: 12px;">
+          <template x-for="s in ['core', 'maturity-gated', 'risk-discretionary', 'interface']" :key="s">
+            <label class="check-row">
+              <input type="checkbox" :value="s" x-model="graph.status" @change="rebuildGraph()">
+              <span x-text="s"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">Layers</span>
+        <div class="group-body" style="gap: 12px;">
+          <label class="check-row" style="color: #94a3b8;">
+            <input type="checkbox" checked disabled> L1 Core
+          </label>
+          <label class="check-row">
+            <input type="checkbox" x-model="graph.layer.perDomain" @change="rebuildGraph()"> Per-domain
+          </label>
+          <label class="check-row">
+            <input type="checkbox" x-model="graph.layer.joins" @change="rebuildGraph()"> Cross-domain joins
+          </label>
+          <label class="check-row">
+            <input type="checkbox" x-model="graph.reifiedTriangles" @change="rebuildGraph()"> Reified
+            <span class="legend-tri" style="color: #94a3b8;"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">Focus</span>
+        <div class="group-body" style="gap: 12px;">
+          <label class="check-row">
+            <input type="radio" name="focusMode" value="highlight" x-model="graph.focusMode" @change="resetFocus()"> Highlight
+          </label>
+          <label class="check-row">
+            <input type="radio" name="focusMode" value="isolate" x-model="graph.focusMode" @change="resetFocus()"> Isolate
+          </label>
+          <label class="check-row">
+            <input type="checkbox" x-model="graph.twoHop" @change="if (graph.focusedNode) focusNode(graph.focusedNode)"> 2-hop
+          </label>
+        </div>
+      </div>
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">Layout</span>
+        <div class="group-body">
+          <select x-model="graph.layout" @change="runLayout()" class="select" style="width: 150px;">
+            <option value="cose">cose</option>
+            <option value="concentric">concentric</option>
+            <option value="breadthfirst">breadthfirst</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="graph-toolbar-group">
+        <span class="group-label">View</span>
+        <div class="group-body">
+          <button @click="zoomIn()" class="btn btn-sm" title="Zoom in">
+            <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="14" y1="14" x2="10.5" y2="10.5"/><line x1="7" y1="5" x2="7" y2="9"/><line x1="5" y1="7" x2="9" y2="7"/></svg>
+          </button>
+          <button @click="zoomOut()" class="btn btn-sm" title="Zoom out">
+            <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="14" y1="14" x2="10.5" y2="10.5"/><line x1="5" y1="7" x2="9" y2="7"/></svg>
+          </button>
+          <button @click="fitView()" class="btn btn-sm" title="Fit">Fit</button>
+          <button x-show="graph.focusedNode" @click="fitToSelection()" class="btn btn-sm">Fit selection</button>
+          <button x-show="graph.focusedNode" @click="resetFocus()" class="btn btn-sm">Reset focus</button>
+          <button @click="resetView()" class="btn btn-sm">Reset</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Graph + detail panel -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-0 graph-container" style="border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+      <div class="lg:col-span-3 relative bg-white" style="border-right: 1px solid #e2e8f0;">
+        <div id="cy" class="w-full h-full"></div>
+        <div class="cy-hint">Scroll to zoom · drag to pan · click node for details</div>
+        <div x-show="!graph.focusedNode" class="cy-legend">
+          <div class="font-medium text-slate-700 mb-1">Legend</div>
+          <div class="flex items-center gap-2"><span class="legend-dot" style="background:#0f7370;"></span> Core (largest)</div>
+          <div class="flex items-center gap-2"><span class="legend-dot" style="background:#64748b;"></span> Maturity-gated · risk-discretionary · interface (decreasing size)</div>
+          <div class="text-slate-500 mt-1">Border: thick = DPV mapping; dashed = DPV gap. Dashed grey edge = cross-domain join.</div>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      <aside class="lg:col-span-1 graph-detail scrollbar-thin">
+        <template x-if="!graph.focusedNode">
+          <div class="text-slate-600">
+            <div class="h-section mb-2">Detail panel</div>
+            <p>Click a node in the graph to see its definition, neighbours, and cross-references.</p>
+          </div>
+        </template>
+        <template x-if="graph.focusedNode">
+          <div>
+            <button @click="resetFocus()" class="btn btn-sm mb-2">
+              <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 4 6 8 10 12"/></svg>
+              Clear
+            </button>
+            <div class="font-mono text-sm text-slate-500" x-text="graph.focusedNode"></div>
+            <h3 class="font-semibold text-slate-900 text-lg mt-1 mb-2" x-text="graphNode().name"></h3>
+            <div class="flex flex-wrap gap-1 mb-2">
+              <template x-for="d in (graphNode().domains || [])" :key="d">
+                <span class="badge" x-text="'#' + d"></span>
+              </template>
+              <span class="badge badge-status" x-text="graphNode().status"></span>
+              <span x-show="graphNode().reified" class="badge badge-accent">reified</span>
+            </div>
+            <dl class="dl-stats mb-3">
+              <dt>Maturity</dt><dd x-text="graphNode().maturity || '—'"></dd>
+              <dt>DPV</dt><dd x-text="graphNode().dpvMapping || '—'"></dd>
+            </dl>
+            <p class="text-sm text-slate-700 mb-3" x-text="graphNode().definition"></p>
+
+            <div class="h-sub mt-3 mb-1">Outgoing</div>
+            <ul class="text-sm space-y-1">
+              <template x-for="r in graphOutgoing()" :key="r.id + '->'+ r.to">
+                <li>
+                  <span class="font-mono text-xs text-slate-500" x-text="r.id"></span>
+                  <span class="text-slate-700" x-text="r.name"></span>
+                  <span class="text-slate-400">→</span>
+                  <button @click="focusNodeByName(r.to)" class="text-link" x-text="r.to"></button>
+                  <span class="font-mono text-xs text-slate-500" x-text="'(' + r.card + ')'"></span>
+                </li>
+              </template>
+              <li x-show="graphOutgoing().length === 0" class="text-slate-400">None</li>
+            </ul>
+
+            <div class="h-sub mt-3 mb-1">Incoming</div>
+            <ul class="text-sm space-y-1">
+              <template x-for="r in graphIncoming()" :key="r.id + '<-' + r.from">
+                <li>
+                  <button @click="focusNodeByName(r.from)" class="text-link" x-text="r.from"></button>
+                  <span class="text-slate-400">→</span>
+                  <span class="font-mono text-xs text-slate-500" x-text="r.id"></span>
+                  <span class="text-slate-700" x-text="r.name"></span>
+                  <span class="font-mono text-xs text-slate-500" x-text="'(' + r.card + ')'"></span>
+                </li>
+              </template>
+              <li x-show="graphIncoming().length === 0" class="text-slate-400">None</li>
+            </ul>
+
+            <div class="mt-4 pt-3 border-t border-slate-200 flex flex-col gap-1">
+              <button @click="centerOnNode(graph.focusedNode)" class="btn btn-sm">Center on this node</button>
+              <button @click="openInCatalog(graph.focusedNode)" class="btn btn-sm">
+                Open in Entity Catalog
+                <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 4 10 8 6 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </template>
+      </aside>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+// ============== MODEL LOADER ==============
+// The reference-model data lives in `data/model.json` and is fetched at startup.
+// Why externalised: keeps this HTML diff-friendly (~150 KB vs ~236 KB) and lets
+// the JSON be consumed by other tools.
+// Local development: most browsers block `fetch()` on `file://` URLs. Serve the
+//   `deliverables/` folder over HTTP instead — e.g. `python -m http.server` and
+//   open http://localhost:8000/Interactive%20Explorer.html
+// GitHub Pages (or any static host) needs no extra configuration; relative-URL
+//   fetches just work.
+
+let MODEL = null;
+let modelLoadError = null;
+
+async function loadModel() {
+  try {
+    const response = await fetch('data/model.json');
+    if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+    MODEL = await response.json();
+    filterPresentationOnly(MODEL);
+    window.MODEL = MODEL;  // expose globally as before
+    return MODEL;
+  } catch (err) {
+    modelLoadError = err;
+    throw err;
+  }
+}
+
+// Presentation-only filter: strip Domain 13 (Technology & AI Governance) from
+// every in-app view. The underlying model.json and machine-readable sources
+// keep D13 intact; this only affects what the Explorer surfaces to the reader.
+// To restore D13, delete this function's body (or set HIDDEN_DOMAINS to []).
+const HIDDEN_DOMAINS = [13];
+function filterPresentationOnly(model) {
+  if (!model || !HIDDEN_DOMAINS.length) return;
+  const hide = new Set(HIDDEN_DOMAINS);
+  const stripDoms = (arr) => (arr || []).filter(d => !hide.has(d));
+
+  if (Array.isArray(model.domains)) {
+    model.domains = model.domains.filter(d => !hide.has(d.id));
+  }
+  if (Array.isArray(model.entities)) {
+    model.entities = model.entities
+      .map(e => ({ ...e, domains: stripDoms(e.domains) }))
+      // Drop entities that were exclusively scoped to a hidden domain.
+      .filter(e => (e.domains && e.domains.length) || (e.id || '').startsWith('C-E') || (e.id || '').startsWith('M-'));
+  }
+  if (Array.isArray(model.decisions)) {
+    model.decisions = model.decisions
+      .map(d => ({ ...d, domains: stripDoms(d.domains) }))
+      .filter(d => d.domains && d.domains.length);
+  }
+  if (Array.isArray(model.crossDomainJoins)) {
+    model.crossDomainJoins = model.crossDomainJoins
+      .filter(j => !hide.has(j.sourceDomain) && !hide.has(j.targetDomain));
+  }
+  if (Array.isArray(model.profiles)) {
+    model.profiles = model.profiles.map(p => ({ ...p, domains: stripDoms(p.domains) }));
+  }
+  if (model.maturityDeltas && typeof model.maturityDeltas === 'object') {
+    hide.forEach(id => { delete model.maturityDeltas[String(id)]; });
+  }
+  // Update stats headline for capability-domain count.
+  if (Array.isArray(model.stats)) {
+    model.stats = model.stats.map(s => {
+      if (s.label && /Capability domains/i.test(s.label)) {
+        return { ...s, value: (model.domains || []).length };
+      }
+      return s;
+    });
+  }
+}
+
+function hideLoadingOverlay() {
+  const el = document.getElementById('model-loading-overlay');
+  if (el) el.style.display = 'none';
+}
+
+function showErrorOverlay(err) {
+  hideLoadingOverlay();
+  const overlay = document.getElementById('model-error-overlay');
+  const detail = document.getElementById('model-error-detail');
+  if (detail) detail.textContent = (err && (err.stack || err.message)) || String(err);
+  if (overlay) overlay.style.display = 'flex';
+}
+
+// Inject Alpine.js dynamically only after MODEL is loaded. The HTML <head> ships
+// Alpine as a stub <script id="alpine-script-stub" data-src="..."> with no `src`,
+// so it never runs on its own. Once `loadModel()` resolves, we append a real
+// <script src=...> that points to the same CDN URL, and Alpine boots normally
+// with `x-data="explorer()"` already having access to the populated MODEL.
+function startAlpine() {
+  const stub = document.getElementById('alpine-script-stub');
+  const src = stub ? stub.getAttribute('data-src') : 'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
+  const s = document.createElement('script');
+  s.src = src;
+  s.defer = true;
+  s.onerror = (e) => showErrorOverlay(new Error('Failed to load Alpine.js from ' + src));
+  document.head.appendChild(s);
+}
+
+loadModel()
+  .then(() => {
+    hideLoadingOverlay();
+    startAlpine();
+  })
+  .catch((err) => {
+    console.error('Failed to load reference model:', err);
+    showErrorOverlay(err);
+  });
+
+// ============== ALPINE COMPONENT ==============
+function explorer() {
+  return {
+    MODEL,
+    view: 'home',
+    views: [
+      { id: 'home', label: 'Home' },
+      { id: 'graph', label: 'Graph' },
+      { id: 'domains', label: 'Domains' },
+      { id: 'entities', label: 'Entities' },
+      { id: 'relationships', label: 'Relationships' },
+      { id: 'decisions', label: 'Decisions' },
+      { id: 'maturity', label: 'Maturity' }
+    ],
+    quickLinks: [],
+    get stats() { return (this.MODEL && this.MODEL.stats) || []; },
+    selectedDomain: null,
+    expandedEntity: null,
+    highlightedEntity: null,
+    highlightedDecision: null,
+
+    // ----- Intro-panel dismissal state (persisted in localStorage per view) -----
+    intros: {
+      home: true, domains: true, entities: true, relationships: true,
+      decisions: true, maturity: true, graph: true
+    },
+    entityFilters: { search: '', domain: '', status: ['core', 'maturity-gated', 'risk-discretionary', 'interface'], minLevel: 1 },
+    relFilters: { search: '', from: '', card: '', obl: '' },
+    decFilters: { search: '', domain: '' },
+    maturityDomain: 'all',
+    maturityTransition: 'all',
+
+    // ----- Graph state -----
+    cy: null,
+    graph: {
+      search: '',
+      domain: '',
+      status: ['core', 'maturity-gated', 'risk-discretionary', 'interface'],
+      maxLevel: 5,
+      layout: 'cose',
+      layer: { perDomain: true, joins: true },
+      reifiedTriangles: true,
+      focusMode: 'highlight',
+      twoHop: false,
+      focusedNode: null
+    },
+    graphStats: { nodes: 0, edges: 0 },
+
+    init() {
+      // Read hash routing on init
+      const h = window.location.hash.replace('#', '');
+      if (h) this.view = h.split(':')[0];
+      // Watch view changes to mount Cytoscape lazily
+      this.$watch('view', (v) => {
+        if (v === 'graph') this.$nextTick(() => this.initGraph());
+      });
+      if (this.view === 'graph') this.$nextTick(() => this.initGraph());
+      // Restore intro dismissal state from localStorage
+      try {
+        Object.keys(this.intros).forEach(k => {
+          const saved = localStorage.getItem('intro_' + k);
+          if (saved === 'dismissed') this.intros[k] = false;
+        });
+      } catch (e) { /* ignore */ }
+      // ESC dismisses any open tooltip
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+          document.querySelectorAll('.tt-trigger:focus').forEach(el => el.blur());
+        }
+      });
+    },
+
+    dismissIntro(name) {
+      this.intros[name] = false;
+      try { localStorage.setItem('intro_' + name, 'dismissed'); } catch (e) {}
+    },
+    showAllIntros() {
+      Object.keys(this.intros).forEach(k => { this.intros[k] = true; });
+      try {
+        Object.keys(this.intros).forEach(k => localStorage.removeItem('intro_' + k));
+      } catch (e) {}
+    },
+
+    setView(v) {
+      this.view = v;
+      this.selectedDomain = null;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    // ----- Filters -----
+    filteredEntities() {
+      const f = this.entityFilters;
+      const levelN = parseInt(f.minLevel);
+      return MODEL.entities.filter(e => {
+        if (f.search && !((e.name + ' ' + e.id).toLowerCase().includes(f.search.toLowerCase()))) return false;
+        if (f.domain && !e.domains.includes(parseInt(f.domain))) return false;
+        if (f.status.length && !f.status.includes(e.status)) return false;
+        // Maturity min-level filter — show entities that exist at (or below the introduction
+        // threshold of) the selected level. "L1+" is always visible; "L3+" is visible at min=L3,
+        // L4, L5; "L4+" is visible only at min=L4/L5; etc. Filter passes if ANY level mentioned
+        // in the maturity string is <= levelN.
+        if (levelN > 1) {
+          const m = e.maturity || '';
+          const levelsInString = [...m.matchAll(/L(\d)/g)].map(x => parseInt(x[1]));
+          if (levelsInString.length === 0) return true;   // no L reference — show
+          const minLevel = Math.min(...levelsInString);
+          if (minLevel > levelN) return false;             // hide only if introduced above selected level
+        }
+        return true;
+      });
+    },
+
+    filteredRels() {
+      const f = this.relFilters;
+      return MODEL.relationships.filter(r => {
+        if (f.search && !((r.name + ' ' + r.id).toLowerCase().includes(f.search.toLowerCase()))) return false;
+        if (f.from && !r.from.toLowerCase().includes(f.from.toLowerCase())) return false;
+        if (f.card && r.card !== f.card) return false;
+        if (f.obl && r.obligation !== f.obl) return false;
+        return true;
+      });
+    },
+
+    filteredDecisions() {
+      const f = this.decFilters;
+      return MODEL.decisions.filter(d => {
+        if (f.search && !((d.title + ' ' + d.id).toLowerCase().includes(f.search.toLowerCase()))) return false;
+        if (f.domain && !d.domains.includes(parseInt(f.domain))) return false;
+        return true;
+      });
+    },
+    // Produce a ≤2-sentence contextualization from the decision's options,
+    // recommendation, and tightening fields. Falls back to whichever fields
+    // are populated.
+    decisionContext(d) {
+      const opts = (d.options || '').toString().trim();
+      const rec = (d.recommendation || '').toString().trim();
+      const tight = (d.tightening || '').toString().trim();
+      const parts = [];
+      if (opts) parts.push('Options: ' + opts + '.');
+      if (rec) {
+        // If recommendation contains "RESOLVED v1.0" prefix, surface it.
+        parts.push('Default: ' + rec + (tight && !/RESOLVED/i.test(rec) ? (' (tightens at ' + tight + ').') : '.'));
+      } else if (tight) {
+        parts.push('Tightens at ' + tight + '.');
+      }
+      return parts.join(' ');
+    },
+
+    // ----- Cross-refs -----
+    toggleEntity(id) { this.expandedEntity = this.expandedEntity === id ? null : id; },
+    jumpToEntity(id) {
+      this.view = 'entities';
+      this.entityFilters.search = '';
+      this.entityFilters.domain = '';
+      this.entityFilters.status = ['core', 'maturity-gated', 'risk-discretionary', 'interface'];
+      this.entityFilters.minLevel = 1;
+      this.highlightedEntity = id;
+      this.expandedEntity = id;
+      this.$nextTick(() => {
+        const el = document.getElementById('entity-' + id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => { this.highlightedEntity = null; }, 2000);
+      });
+    },
+    jumpToDecision(id) {
+      this.view = 'decisions';
+      this.decFilters.search = '';
+      this.decFilters.domain = '';
+      this.highlightedDecision = id;
+      this.$nextTick(() => {
+        const el = document.getElementById('decision-' + id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => { this.highlightedDecision = null; }, 2000);
+      });
+    },
+    jumpToDomain(id) {
+      this.view = 'domains';
+      this.selectedDomain = MODEL.domains.find(d => d.id === id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    // ----- Lookups -----
+    entityName(id) {
+      const e = MODEL.entities.find(x => x.id === id);
+      return e ? e.name : id;
+    },
+    decisionTitle(id) {
+      const d = MODEL.decisions.find(x => x.id === id);
+      return d ? d.title : id;
+    },
+    currentDomain() {
+      if (this.maturityDomain === 'all') return null;
+      return MODEL.domains.find(d => d.id === parseInt(this.maturityDomain));
+    },
+    currentDeltas() {
+      const md = MODEL.maturityDeltas || {};
+      const wantAllDom = this.maturityDomain === 'all';
+      const wantAllTrans = this.maturityTransition === 'all';
+      const domainName = (id) => {
+        const d = MODEL.domains.find(x => x.id === parseInt(id));
+        return d ? '#' + id + ' ' + d.name : '#' + id;
+      };
+      const domainKeys = wantAllDom
+        ? MODEL.domains.map(d => String(d.id))
+        : [String(this.maturityDomain)];
+      const transitionKeys = wantAllTrans
+        ? ['L1→L2', 'L2→L3', 'L3→L4', 'L4→L5']
+        : [this.maturityTransition];
+      const out = [];
+      for (const dk of domainKeys) {
+        const dom = md[dk];
+        if (!dom) continue;
+        for (const tk of transitionKeys) {
+          const items = dom[tk] || [];
+          for (const it of items) {
+            out.push({ ...it, _domainLabel: domainName(dk), _transitionLabel: tk });
+          }
+        }
+      }
+      return out;
+    },
+    costDots(cost) {
+      // Convert cost (low/moderate/high) to filled-dot string. Slate-700 filled, slate-300 empty.
+      const filled = { 'low': 1, 'moderate': 2, 'high': 3 }[(cost || '').toLowerCase()] || 0;
+      let html = '';
+      for (let i = 0; i < 3; i++) {
+        html += '<span class="' + (i < filled ? 'filled' : 'empty') + '">' + (i < filled ? '●' : '○') + '</span>';
+      }
+      return html;
+    },
+
+    // ----- Badges (legacy hooks; kept callable for any holdover usages) -----
+    statusBadge(s) { return 'badge'; },
+    obligationBadge(o) { return 'badge'; },
+    costBadge(c) { return 'badge'; },
+    typeBadge(t) { return 'badge'; },
+    groupBadge(g) { return 'badge'; },
+    priorityBadge(p) { return 'badge'; },
+
+    // ============== GRAPH METHODS ==============
+    DOMAIN_COLOR(d) {
+      // Per-domain palette (Group A/B/C/D family with a consistent hue per domain id)
+      const palette = {
+        1: '#6366f1', 2: '#8b5cf6', 3: '#a855f7', 4: '#d946ef', 5: '#ec4899',
+        6: '#10b981', 7: '#14b8a6', 8: '#06b6d4',
+        9: '#f59e0b', 10: '#f97316', 11: '#ef4444',
+        12: '#64748b', 13: '#0ea5e9'
+      };
+      return palette[d] || '#94a3b8';
+    },
+    CARD_COLOR(c) {
+      if (!c) return '#94a3b8';
+      if (c === '1..1') return '#1d4ed8';
+      if (c === '1..N' || c === '1..M') return '#7c3aed';
+      if (c === '0..1') return '#64748b';
+      if (c === '0..N') return '#94a3b8';
+      if (c === 'N..M') return '#0891b2';
+      return '#64748b';
+    },
+    statusSize(s) {
+      return ({ 'core': 38, 'maturity-gated': 30, 'risk-discretionary': 24, 'interface': 20 })[s] || 28;
+    },
+    nameToEntityId(name) {
+      const e = MODEL.entities.find(x => x.name === name || x.id === name);
+      return e ? e.id : null;
+    },
+    entityByIdOrName(idOrName) {
+      return MODEL.entities.find(x => x.id === idOrName || x.name === idOrName);
+    },
+    isMaturityVisible(maturity, maxLevel) {
+      // Show entities whose introduction (minimum L in the maturity string) is at or below
+      // the maxLevel slider. Handles multi-clause maturity strings like "L2 (introduced); L3+ (mandatory)".
+      const m = maturity || '';
+      const levelsInString = [...m.matchAll(/L(\d)/g)].map(x => parseInt(x[1]));
+      if (levelsInString.length === 0) return true;
+      const introLevel = Math.min(...levelsInString);
+      return introLevel <= maxLevel;
+    },
+    entityPassesFilters(e) {
+      const g = this.graph;
+      // Core-spine entities always pass the layer filter, per-domain ones gated by layer
+      const isCore = (e.id || '').startsWith('C-E');
+      if (!isCore && !g.layer.perDomain) return false;
+      // Domain filter
+      if (g.domain && !e.domains.includes(parseInt(g.domain))) return false;
+      // Status checkboxes
+      if (g.status.length && !g.status.includes(e.status)) return false;
+      // Maturity slider
+      if (!this.isMaturityVisible(e.maturity, parseInt(g.maxLevel))) return false;
+      return true;
+    },
+    buildGraphElements() {
+      const elements = [];
+      const visibleEntityIds = new Set();
+
+      // 1. Build nodes from entities (always include core; per-domain conditionally)
+      MODEL.entities.forEach(e => {
+        if (!this.entityPassesFilters(e)) return;
+        visibleEntityIds.add(e.id);
+        const primaryDomain = (e.domains && e.domains[0]) || 0;
+        const isReified = !!e.reified;
+        const shortLabel = e.name.length > 18 ? e.name.substring(0, 17) + '…' : e.name;
+        const dpvGap = (e.dpvMapping || '').toLowerCase().includes('gap');
+        const hasDpv = !!e.dpvMapping && e.dpvMapping !== '—' && !dpvGap;
+        elements.push({
+          group: 'nodes',
+          data: {
+            id: e.id,
+            label: shortLabel,
+            fullName: e.name,
+            domain: primaryDomain,
+            status: e.status,
+            reified: isReified,
+            isCore: (e.id || '').startsWith('C-E'),
+            color: this.DOMAIN_COLOR(primaryDomain),
+            shape: (this.graph.reifiedTriangles && isReified) ? 'triangle' : 'ellipse',
+            size: this.statusSize(e.status),
+            borderWidth: hasDpv ? 3 : 1,
+            borderStyle: dpvGap ? 'dashed' : 'solid',
+            cluster: 'd' + primaryDomain
+          }
+        });
+      });
+
+      // 2. Helper to find entity ID from a relationship "from"/"to" field which may be a name
+      const resolveNode = (label) => {
+        if (!label) return null;
+        // strip parenthetical and dotted suffixes
+        const clean = label.replace(/\s*\(.*?\)\s*/g, '').trim();
+        // Direct id match
+        if (visibleEntityIds.has(clean)) return clean;
+        // Find by name
+        const ent = MODEL.entities.find(x => x.name === clean || x.id === clean);
+        if (ent && visibleEntityIds.has(ent.id)) return ent.id;
+        return null;
+      };
+
+      // 3. Core relationships (L1 layer — always on)
+      MODEL.relationships.forEach(r => {
+        const src = resolveNode(r.from);
+        const tgt = resolveNode(r.to);
+        if (!src || !tgt) return;
+        elements.push({
+          group: 'edges',
+          data: {
+            id: 'rel-' + r.id,
+            source: src,
+            target: tgt,
+            label: r.name,
+            relId: r.id,
+            card: r.card,
+            obligation: r.obligation,
+            kind: 'core',
+            color: this.CARD_COLOR(r.card),
+            lineStyle: 'solid',
+            width: 2,
+            opacity: 0.85
+          }
+        });
+      });
+
+      // 4. Per-domain relationships
+      if (this.graph.layer.perDomain && MODEL.perDomainRelationships) {
+        MODEL.perDomainRelationships.forEach(r => {
+          const src = resolveNode(r.from);
+          const tgt = resolveNode(r.to);
+          if (!src || !tgt) return;
+          elements.push({
+            group: 'edges',
+            data: {
+              id: 'pdr-' + r.id,
+              source: src,
+              target: tgt,
+              label: r.name,
+              relId: r.id,
+              card: r.card,
+              obligation: r.obligation,
+              kind: 'perDomain',
+              color: this.CARD_COLOR(r.card),
+              lineStyle: 'solid',
+              width: 1,
+              opacity: 0.6
+            }
+          });
+        });
+      }
+
+      // 5. Cross-domain joins
+      if (this.graph.layer.joins && MODEL.crossDomainJoins) {
+        MODEL.crossDomainJoins.forEach(j => {
+          if (j.crossCutting || !j.source || !j.target) return;
+          const src = resolveNode(j.source);
+          const tgt = resolveNode(j.target);
+          if (!src || !tgt || src === tgt) return;
+          elements.push({
+            group: 'edges',
+            data: {
+              id: 'join-' + j.id,
+              source: src,
+              target: tgt,
+              label: j.relationshipName,
+              relId: j.id,
+              card: j.card,
+              obligation: '—',
+              kind: 'join',
+              color: '#64748b',
+              lineStyle: 'dashed',
+              width: 1,
+              opacity: 0.45
+            }
+          });
+        });
+      }
+
+      return elements;
+    },
+    initGraph() {
+      if (!window.cytoscape) {
+        console.warn('Cytoscape not loaded yet');
+        setTimeout(() => this.initGraph(), 200);
+        return;
+      }
+      if (window.cytoscapeFcose && !window._fcoseRegistered) {
+        try { cytoscape.use(cytoscapeFcose); window._fcoseRegistered = true; } catch (e) { /* already registered */ }
+      }
+      const container = document.getElementById('cy');
+      if (!container) return;
+      if (this.cy) {
+        // Already initialised — just rebuild
+        this.rebuildGraph();
+        return;
+      }
+      const elements = this.buildGraphElements();
+      this.cy = cytoscape({
+        container,
+        elements,
+        wheelSensitivity: 0.2,
+        minZoom: 0.1,
+        maxZoom: 4,
+        style: this.cyStyle(),
+        layout: this.layoutOptions()
+      });
+      this.updateGraphStats();
+      this.attachGraphHandlers();
+    },
+    cyStyle() {
+      return [
+        {
+          selector: 'node',
+          style: {
+            'background-color': 'data(color)',
+            'label': 'data(label)',
+            'color': '#0f172a',
+            'font-size': '10px',
+            'font-weight': 600,
+            'text-valign': 'bottom',
+            'text-halign': 'center',
+            'text-margin-y': 4,
+            'text-background-color': '#ffffff',
+            'text-background-opacity': 0.85,
+            'text-background-padding': '2px',
+            'text-background-shape': 'roundrectangle',
+            'width': 'data(size)',
+            'height': 'data(size)',
+            'shape': 'data(shape)',
+            'border-width': 'data(borderWidth)',
+            'border-color': '#334155',
+            'border-style': 'data(borderStyle)',
+            'transition-property': 'opacity, background-color',
+            'transition-duration': '180ms'
+          }
+        },
+        {
+          selector: 'node.dimmed',
+          style: { 'opacity': 0.15 }
+        },
+        {
+          selector: 'node.highlighted',
+          style: { 'opacity': 1, 'border-width': 4, 'border-color': '#0f7370' }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 'data(width)',
+            'line-color': 'data(color)',
+            'line-style': 'data(lineStyle)',
+            'opacity': 'data(opacity)',
+            'curve-style': 'bezier',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': 'data(color)',
+            'arrow-scale': 0.8,
+            'transition-property': 'opacity, width',
+            'transition-duration': '180ms'
+          }
+        },
+        {
+          selector: 'edge.dimmed',
+          style: { 'opacity': 0.05 }
+        },
+        {
+          selector: 'edge.highlighted',
+          style: { 'opacity': 1, 'width': 3 }
+        }
+      ];
+    },
+    layoutOptions() {
+      // Fall back to 'cose' if fcose isn't available
+      let layoutName = this.graph.layout;
+      if (layoutName === 'fcose' && !window._fcoseRegistered) layoutName = 'cose';
+      const base = { name: layoutName, animate: true, animationDuration: 400, fit: true, padding: 40 };
+      if (layoutName === 'fcose') {
+        return Object.assign(base, {
+          nodeRepulsion: 6000,
+          idealEdgeLength: 80,
+          nodeSeparation: 80,
+          edgeElasticity: 0.45,
+          gravity: 0.25,
+          numIter: 2500,
+          tile: true,
+          quality: 'default',
+          randomize: false
+        });
+      }
+      if (layoutName === 'cose') {
+        return Object.assign(base, { nodeRepulsion: 400000, idealEdgeLength: 100 });
+      }
+      if (layoutName === 'concentric') {
+        return Object.assign(base, { minNodeSpacing: 30, concentric: (n) => (n.data('isCore') ? 10 : (n.data('reified') ? 5 : 1)), levelWidth: () => 1 });
+      }
+      if (layoutName === 'breadthfirst') {
+        return Object.assign(base, { directed: true, spacingFactor: 1.4 });
+      }
+      return base;
+    },
+    rebuildGraph() {
+      if (!this.cy) {
+        if (this.view === 'graph') this.$nextTick(() => this.initGraph());
+        return;
+      }
+      const els = this.buildGraphElements();
+      this.cy.elements().remove();
+      this.cy.add(els);
+      this.updateGraphStats();
+      this.runLayout();
+      this.resetFocus();
+    },
+    runLayout() {
+      if (!this.cy) return;
+      const layout = this.cy.layout(this.layoutOptions());
+      layout.run();
+    },
+    updateGraphStats() {
+      if (!this.cy) return;
+      this.graphStats.nodes = this.cy.nodes().length;
+      this.graphStats.edges = this.cy.edges().length;
+    },
+    attachGraphHandlers() {
+      if (!this.cy) return;
+      this.cy.on('tap', 'node', (evt) => {
+        const id = evt.target.id();
+        this.focusNode(id);
+      });
+      this.cy.on('tap', (evt) => {
+        if (evt.target === this.cy) {
+          this.resetFocus();
+        }
+      });
+      // Edge tooltips via :title attr (Cytoscape doesn't auto-show; use mouseover qtip-style title injection)
+      this.cy.on('mouseover', 'edge', (evt) => {
+        const e = evt.target;
+        const d = e.data();
+        const title = (d.label || '') + ' · ' + (d.card || '') + ' · ' + (d.obligation || '');
+        e.style('label', title);
+        e.style('font-size', '9px');
+        e.style('color', '#1e293b');
+        e.style('text-background-color', '#ffffff');
+        e.style('text-background-opacity', 0.9);
+        e.style('text-background-padding', '2px');
+        e.style('text-background-shape', 'roundrectangle');
+      });
+      this.cy.on('mouseout', 'edge', (evt) => {
+        evt.target.removeStyle('label font-size color text-background-color text-background-opacity text-background-padding text-background-shape');
+      });
+    },
+    focusNode(id) {
+      this.graph.focusedNode = id;
+      if (!this.cy) return;
+      const node = this.cy.getElementById(id);
+      if (!node || node.empty()) return;
+      let hood = node.closedNeighborhood();
+      if (this.graph.twoHop) {
+        hood = hood.union(node.neighborhood().nodes().closedNeighborhood());
+      }
+      if (this.graph.focusMode === 'highlight') {
+        this.cy.elements().addClass('dimmed');
+        hood.removeClass('dimmed').addClass('highlighted');
+      } else if (this.graph.focusMode === 'isolate') {
+        this.cy.elements().style('display', 'none');
+        hood.style('display', 'element');
+        hood.addClass('highlighted');
+        this.runLayout();
+      }
+      this.cy.animate({ fit: { eles: hood, padding: 60 }, duration: 350 });
+    },
+    focusNodeByName(name) {
+      const eid = this.nameToEntityId(name);
+      if (eid && this.cy && !this.cy.getElementById(eid).empty()) {
+        this.focusNode(eid);
+      }
+    },
+    resetFocus() {
+      this.graph.focusedNode = null;
+      if (!this.cy) return;
+      this.cy.elements().removeClass('dimmed highlighted');
+      this.cy.elements().style('display', 'element');
+    },
+    centerOnNode(id) {
+      if (!this.cy) return;
+      const n = this.cy.getElementById(id);
+      if (n.empty()) return;
+      this.cy.animate({ center: { eles: n }, zoom: 1.4, duration: 350 });
+    },
+    fitToSelection() {
+      if (!this.cy || !this.graph.focusedNode) return;
+      const node = this.cy.getElementById(this.graph.focusedNode);
+      let hood = node.closedNeighborhood();
+      if (this.graph.twoHop) hood = hood.union(node.neighborhood().nodes().closedNeighborhood());
+      this.cy.animate({ fit: { eles: hood, padding: 50 }, duration: 350 });
+    },
+    fitView() { if (this.cy) this.cy.animate({ fit: { padding: 40 }, duration: 350 }); },
+    resetView() { if (this.cy) { this.resetFocus(); this.cy.animate({ fit: { padding: 40 }, duration: 350 }); } },
+    zoomIn() { if (this.cy) this.cy.animate({ zoom: this.cy.zoom() * 1.25, duration: 200 }); },
+    zoomOut() { if (this.cy) this.cy.animate({ zoom: this.cy.zoom() * 0.8, duration: 200 }); },
+    applyGraphSearch() {
+      if (!this.cy) return;
+      const q = (this.graph.search || '').toLowerCase().trim();
+      if (!q) {
+        this.cy.nodes().removeClass('dimmed highlighted');
+        return;
+      }
+      this.cy.nodes().forEach(n => {
+        const d = n.data();
+        const match = (d.fullName || '').toLowerCase().includes(q) || (d.id || '').toLowerCase().includes(q);
+        if (match) { n.removeClass('dimmed').addClass('highlighted'); }
+        else { n.removeClass('highlighted').addClass('dimmed'); }
+      });
+    },
+    openInCatalog(id) {
+      if (!id) return;
+      this.jumpToEntity(id);
+    },
+    graphNode() {
+      const id = this.graph.focusedNode;
+      if (!id) return {};
+      const e = MODEL.entities.find(x => x.id === id);
+      return e || { name: id, definition: '', domains: [], status: '', maturity: '', dpvMapping: '' };
+    },
+    graphOutgoing() {
+      const id = this.graph.focusedNode;
+      if (!id) return [];
+      const ent = this.entityByIdOrName(id);
+      if (!ent) return [];
+      const fromName = ent.name;
+      const out = [];
+      MODEL.relationships.forEach(r => { if (r.from === fromName || r.from === id) out.push(r); });
+      if (MODEL.perDomainRelationships) {
+        MODEL.perDomainRelationships.forEach(r => { if (r.from === fromName || r.from === id) out.push(r); });
+      }
+      return out;
+    },
+    graphIncoming() {
+      const id = this.graph.focusedNode;
+      if (!id) return [];
+      const ent = this.entityByIdOrName(id);
+      if (!ent) return [];
+      const toName = ent.name;
+      const out = [];
+      MODEL.relationships.forEach(r => { if (r.to === toName || r.to === id) out.push(r); });
+      if (MODEL.perDomainRelationships) {
+        MODEL.perDomainRelationships.forEach(r => { if (r.to === toName || r.to === id) out.push(r); });
+      }
+      return out;
+    },
+    graphFocusLabel() {
+      if (!this.graph.focusedNode) return 'none';
+      const e = MODEL.entities.find(x => x.id === this.graph.focusedNode);
+      return (e ? e.name : this.graph.focusedNode) + ' (' + this.graph.focusMode + (this.graph.twoHop ? ', 2-hop' : ', 1-hop') + ')';
+    }
+  };
+}
+</script>
+
+</body>
+</html>
