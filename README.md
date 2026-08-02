@@ -22,4 +22,4 @@ The rest of the files can be ignored, they are the associated files for the LaTe
 
 ## Getting Started
 
-Visit [PrivacyReferenceModel.com](https://PrivacyReferenceModel.com) to browse the model interactively — no setup required.
+Visit [PrivacyReferenceModel.com](https://PrivacyReferenceModel.com) to browse the model interactively, no setup required.
