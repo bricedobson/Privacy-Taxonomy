@@ -14,7 +14,7 @@ The explorer supports graph visualization with maturity filtering, layer isolati
 
 | File | Description |
 |------|-------------|
-| `index.html` | Page source for the interactive explorer application |
+| `Explorer.html` | Page source for the interactive explorer application |
 | `data/model.json` | The reference data model (entities, relationships, decisions, and maturity metadata) |
 | `Paper.pdf` | The accompanying paper |
 
