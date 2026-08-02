@@ -18,6 +18,8 @@ The explorer supports graph visualization with maturity filtering, layer isolati
 | `data/model.json` | The reference data model (entities, relationships, decisions, and maturity metadata) |
 | `Paper.pdf` | The accompanying paper |
 
+The rest of the files can be ignored, they are the associated files for the LaTeX source of `Paper.pdf`.
+
 ## Getting Started
 
 Visit [PrivacyReferenceModel.com](https://PrivacyReferenceModel.com) to browse the model interactively — no setup required.
