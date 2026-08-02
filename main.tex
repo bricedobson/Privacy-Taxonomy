@@ -66,6 +66,16 @@ This work considers what a truly unified data model for privacy would look like 
 \defbibfilter{taxonomycommercialtools}{keyword=taxonomy and keyword=commercial}
 \defbibfilter{taxonomyacademicwork}{keyword=taxonomy and keyword=academic}
 \defbibfilter{referencesonly}{not keyword=taxonomy}
+\defbibenvironment{nolabelbib}
+  {\list{}
+     {\setlength{\leftmargin}{0pt}%
+      \setlength{\itemindent}{0pt}%
+      \setlength{\labelsep}{0pt}%
+      \setlength{\labelwidth}{0pt}%
+      \setlength{\itemsep}{\bibitemsep}}}
+  {\endlist}
+  {\item}
+
 
 \begin{document}
 \setcounter{page}{1}
@@ -213,12 +223,12 @@ The reference data model was produced through a phased approach where each phase
 \# & Phase & Key result \\
 \hline
 1 & Prepare DPV skeleton & 12 subdomains defined \\
-2 & Identify input taxonomies & 40 accepted, +9 supplemental \\
+2 & Identify input taxonomies & 45 accepted, +9 supplemental \\
 3 & Extract entities, attributes, relationships & 578 unique implied relationships (approx.\ 480 raw entries) \\
 4 & Normalize per subdomain & 160 candidate gaps and decision points, 36\% average compression \\
 5 & Cross-subdomain joins & 87 joins mapped \\
 6 & Technical evaluation & 100 test cases over 12 runs, approx.\ 12\% footprint change \\
-7 & Final reconciliation & 3 gaps discussed with the W3C \\
+7 & Final reconciliation & gaps discussed with the W3C \\
 \hline
 \end{tabular}
 \end{table}
@@ -285,7 +295,7 @@ Input taxonomies, that is, the sources that provide the raw material of data ent
 
 \subsection{Extracting the structure each source implies}\label{sec:extraction}
 
-Each source was analyzed for the entities, attributes, relationships, states, and cardinality constraints it explicitly stated. Many sources, especially those within the governmental or regulatory institutions author category, were observed to hold short of declaring requirements for data structures directly but proxy these through use-case-specific taxonomies, examples, templates, or written content. Where these implicit data structure artifacts could be deduced, they were captured based on the entities they implicated. Notably in the governmental or regulatory institutions author type, there was a class of input taxonomies that were preliminarily identified as among the highest quality and most authoritative sources that were ultimately set aside with limited benefit. These were best characterized as ``example reports'', where the authors, almost exclusively regulatory enforcement authorities, were representing a presentation view of synthesized data relationships that they would expect to see in their context, rather than the underlying data relationships. A common example of this is the GDPR Article 30 Report, commonly a ``Record of Procesing Activites''. In this class of document, whose design is based heavily on regulator-published templates that influence commercial tool design and organizational application of data models, several distinct entities and their relationships are ``flattened'' into a singular tabular row optimized for regulator overview. This has the second-order effect of obscuring the underlying structure that subsequently causes confusion about data relationships and encourages errors in data management and application.
+Each source was analyzed for the entities, attributes, relationships, states, and cardinality constraints it explicitly stated. Many sources, especially those within the governmental or regulatory institutions author category, were observed to hold short of declaring requirements for data structures directly but proxy these through use-case-specific taxonomies, examples, templates, or written content. Where these implicit data structure artifacts could be deduced, they were captured based on the entities they implicated. Notably in the governmental or regulatory institutions author type, there was a class of input taxonomies that were preliminarily identified as among the highest quality and most authoritative sources that were ultimately set aside with limited benefit. These were best characterized as ``example reports'', where the authors, almost exclusively regulatory enforcement authorities, were representing a presentation view of synthesized data relationships that they would expect to see in their context, rather than the underlying data relationships. A common example of this is the GDPR Article 30 Report, commonly a ``Record of Processing Activities''. In this class of document, whose design is based heavily on regulator-published templates that influence commercial tool design and organizational application of data models, several distinct entities and their relationships are ``flattened'' into a singular tabular row optimized for regulator overview. This has the second-order effect of obscuring the underlying structure that subsequently causes confusion about data relationships and encourages errors in data management and application.
 
 Fundamentally, the productive insight of the extraction phase is that the data model of a regulation or standard often sits in implicit form within its operational guidance. Fields contained within mandatory disclosures, retention schedules, and template forms constitute primary evidence of required data and structure. In total, 578 unique relationships were implied across the source set.
 
@@ -306,15 +316,14 @@ This step matters because sources disagree more than their individual authority 
 
 \subsection{Cross-subdomain joining}\label{sec:joining}
 
-Upon completion of entity-relationship mapping within subdomains, cross-subdomain joins were mapped using the DPV module relationships as a loose foundation, and work items place-held from individual subdomain views were then reconciled. This produced approximately 80 cross-subdomain joins and resulted in the first draft of the full model. It also surfaced a set of ``messy middle'' artifacts that matter operationally but either lack a clear home or near-evenly span multiple process subdomains. A common theme was that most of these are instantiated, so each instance appears as a subdomain-local entity until forced to confront cross-subdomain joins. Examples include \texttt{AccountabilityArtifact} (spanning over 20 typed document subtypes), \texttt{Notice}, and \texttt{ImpactAssessment}. These become first-class unifying classes in the model and are discussed in Section~\ref{sec:crosscut}.
+Upon completion of entity-relationship mapping within subdomains, cross-subdomain joins were mapped using the DPV module relationships as a loose foundation, and work items place-held from individual subdomain views were then reconciled. This produced approximately 90 cross-subdomain joins and resulted in the first draft of the full model. It also surfaced a set of ``messy middle'' artifacts that matter operationally but either lack a clear home or near-evenly span multiple process subdomains. A common theme was that most of these are instantiated, so each instance appears as a subdomain-local entity until forced to confront cross-subdomain joins. Examples include \texttt{AccountabilityArtifact} (spanning over 20 typed document subtypes), \texttt{Notice}, and \texttt{ImpactAssessment}. These become first-class unifying classes in the model and are discussed in Section~\ref{sec:crosscut}.
 
 \subsection{Evaluation}\label{sec:eval}
 
 The evaluation approach focused primarily on the internal validity of the model, as external validity faced some constraints at this stage with time, level of effort, and information access required. I generally consider that internal validity here means the technical accuracy and completeness of the data model, where external validity is the data model's fit for use and application in implementing organizations.
 
 For the internal validity pillar, the data model was declared as a hybrid OWL/RDFS ontology in Turtle (.ttl) format, essentially making it machine-readable and compatible with common ontological tool sets. One hundred test cases were then built, informed by the NIST Privacy Workforce Taxonomy~\cite{nist-pwt-2024} and the IAPP Privacy Operational Lifecycle~\cite{iapp-ppm-2022}, representing common tasks performed in large-organization privacy programs. Each test case was written in plain language as one or more satisfaction claims, and each claim was then translated into a SPARQL~\cite{sparql11query} SELECT query. SPARQL was selected over relational alternatives because ontologies and their tooling natively support the more complex join patterns, such as tuples, that are pervasive in this problem space. The compiled test cases were run through a purpose-built Python schema
-validator, implemented with RDFLib~\cite{rdflib} and informed by a selection of
-evaluation criteria drawn from Staab and Studer's \emph{Handbook on Ontologies}~\cite{staab2009handbook}, where the validator was built using RDFLib. The validator applied test cases that checked for likely missing entities, format gaps, missing relationships, missing attributes, typing gaps, mismatched domains, and mismatched output ranges.
+validator informed by a selection of evaluation criteria drawn from Staab and Studer's \emph{Handbook on Ontologies}~\cite{staab2009handbook}, where the validator was built using RDFLib~\cite{rdflib}. The validator applied test cases that checked for likely missing entities, format gaps, missing relationships, missing attributes, typing gaps, mismatched domains, and mismatched output ranges.
 
 One representative test case asserts the satisfaction claim \emph{``for a given processing activity, return the lawful basis in force on a specified date, together with the party that held the controller role at that time.''} Its SPARQL translation (Table~\ref{tab:testcase}) exercises two reified associations (\texttt{LegalBasisAssignment} and \texttt{PartyRoleInActivity}), their temporal validity attributes, and two cross-subdomain joins in a single query. A claim of this shape is unanswerable against the unimplemented DPV and within many commercial tools. This is not because the concepts are missing, but rather the missing feature manifestation of the earlier highlighted gaps, \#4 (temporal validity) and \#6 (edge provenance). The test suite is, in effect, a mechanized approach to assess whether the model is technically correct, complete, and closes the original foundational gaps that were asserted as necessary for practitioner use.
 
@@ -365,7 +374,7 @@ Filter acting as a guard to the role binding, so the returned party is the contr
 \end{tabular}
 \end{table}
 
-Running the suite began an iterative process (run the validator, resolve apparent issues, run it again) that converged at approximately 10 iterations. At this point, those that remained were decisions reserved for the implementer (Section~\ref{sec:risk}) and represented stylistic choices of approach and risk tolerance, rather than the construction of the data model. The model's footprint changed approximately 15\% between the pre- and post-evaluation states, with results mostly ``building out'' cross-domain relationships and necessary reified entities in the ``middle'' of the data model. I assert this degree of change establishes the initial evaluation was substantive rather than confirmatory.
+Running the suite began an iterative process (run the validator, resolve apparent issues, run it again) that converged at 12 iterations. At this point, those that remained were decisions reserved for the implementer (Section~\ref{sec:risk}) and represented stylistic choices of approach and risk tolerance, rather than the construction of the data model. The model's footprint changed approximately 12\% between the pre- and post-evaluation states, with results mostly ``building out'' cross-domain relationships and necessary reified entities in the ``middle'' of the data model. I assert this degree of change establishes the initial evaluation was substantive rather than confirmatory.
 
 For the qualitative pillar focused on the data model's fit for use as an application of the DPV, I considered several factors that would have been constraining to the quality of this work, ultimately opting to take a limited approach in this space at this stage. These factors included but were not limited to:
 
@@ -412,7 +421,7 @@ The core was held to be strictly regulation-agnostic, with regulatory requiremen
 Ultimately, these are not dissimilar to the issues experienced earlier during entity-relationship mapping, where two identical concepts had differing terminology under differing standards or regulations. Anecdotally, this close fidelity of core relationships transcending modern regulation likely draws its origins back to various canonical works in data
 privacy, including the modern-day FTC Fair Information Practice Principles articulated via the 1973 HEW report on automated personal data systems~\cite{hew1973fipps} and the OECD Privacy Guidelines (1980)~\cite{oecd1980guidelines}.
 
-The data model is contemplated to contain (\texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, and \texttt{PartyRoleInActivity}) that should appear in every conformant implementation, at every maturity level, under every supported profile. \texttt{ProcessingActivity} is the closest thing that could be reasonably called the ``center'' of the spine, with \texttt{Purpose} attaching through the processing-for-purpose relationship, \texttt{PersonalDataCategory} through processing-of-data, and \texttt{LegalBasis} attaching, at L3 maturity and above, through the \texttt{LegalBasisAssignment} reification so the assignment can carry its own dates and evidence. \texttt{PartyRoleInActivity} is itself a reification of role-in-activity, which is what permits the same party (legal entity) to hold different roles in different activities. This reflects, especially in large organizations, the increased prevalence of one legal entity routinely holding a role as a controller in one activity and a processor in another. This corrects a common normalization flaw where typing roles onto parties directly rather than onto their participation creates inaccuracy as to a party's role and thus their specific obligations. It is recommended that a privacy program implementing the data model should establish these five classes first, regardless of which regulations drive its program.
+The data model is contemplated to contain entities (\texttt{ProcessingActivity}, \texttt{Purpose}, \texttt{PersonalDataCategory}, \texttt{LegalBasis}, and \texttt{PartyRoleInActivity}) that should appear in every conformant implementation, at every maturity level, under every supported profile. \texttt{ProcessingActivity} is the closest thing that could be reasonably called the ``center'' of the spine, with \texttt{Purpose} attaching through the processing-for-purpose relationship, \texttt{PersonalDataCategory} through processing-of-data, and \texttt{LegalBasis} attaching, at L3 maturity and above, through the \texttt{LegalBasisAssignment} reification so the assignment can carry its own dates and evidence. \texttt{PartyRoleInActivity} is itself a reification of role-in-activity, which is what permits the same party (legal entity) to hold different roles in different activities. This reflects, especially in large organizations, the increased prevalence of one legal entity routinely holding a role as a controller in one activity and a processor in another. This corrects a common normalization flaw where typing roles onto parties directly rather than onto their participation creates inaccuracy as to a party's role and thus their specific obligations. It is recommended that a privacy program implementing the data model should establish these five classes first, regardless of which regulations drive its program.
 
 In summary, privacy regulations are doing a lot of the same things in sometimes different words. Reading any single regulation suggests that everything it names is required structure, but comparison across regimes shows that regulations bundle their requirements with regime-specific field names, templates, and enumerations. Even a reading of multiple regulations in a sitting may not make this initially apparent, due in part to the topic breadth of modern comprehensive privacy laws. This reconciliation, as well as the implicit concepts that regulations assume, such as organizations having their own structures and hierarchies to organize and articulate their work, is what forms the spine of the data model.  
 
@@ -436,7 +445,7 @@ The 87 cross-subdomain joins cataloged in the model exist because forced interop
 
 \subsection{Accounting for regulation}\label{sec:regulation}
 
-Regulation attaches to the spine as profiles. Profiles can be conceptually visualized as overlays. They specifically add mandatory concepts not otherwise addressed through a regulation-agnostic approach as entities and relationships, and occasionally attributes or types. Four full profiles (GDPR, CCPA/CPRA, LGPD, DPDPA) and a small set of sectoral skeletons (e.g., HIPAA, GLBA) were composed for this exercise. The design consequence is that operating under multiple regulations more closely resembles a composition problem than a reconciliation one. Because no regulation scheme is reflected in the core, multi-regime processing is supported by implementing the core data model and selecting the appropriate overlays. This has the somewhat intended byproduct of surfacing conflicts for explicit assessment, handling, and decision, rather than being latent.
+Regulation attaches to the spine as profiles. Profiles can be conceptually visualized as overlays. They specifically add mandatory concepts not otherwise addressed through a regulation-agnostic approach as entities and relationships, and occasionally attributes or types. Four full profiles (GDPR, CCPA/CPRA, LGPD, DPDPA) and a small set of sectoral skeletons (e.g., HIPAA, GLBA) were composed for this exercise. The design consequence is that operating under multiple regulations more closely resembles a composition problem than a reconciliation one. Because no regulation scheme is reflected in the core, multi-regime processing is supported by implementing the core data model and selecting the appropriate overlays. This has the somewhat intended consequence of surfacing conflicts for explicit assessment, handling, and decision, rather than being latent.
 
 Consider a SaaS provider operating in both the United States and the European Union, with a single product-analytics processing activity touching personal data of California and EU residents. Under composition, the activity exists once in the core, with one \texttt{ProcessingActivity}, one set of \texttt{Purpose} and \texttt{PersonalDataCategory} attachments, and one \texttt{PartyRoleInActivity} arrangement. The GDPR profile then overlays the Article 30 record fields, the lawful-basis constraint, and the EU-specific transfer mechanic. The CCPA/CPRA profile overlays its disclosure categories, the sale/share flags, and its opt-out semantics. The union composes without error or conflict because the overlays touch different attributes, and where the regulatory schemes do genuinely diverge (e.g. retention expectations) the divergence surfaces as an explicit decision on the composed record. Under reconciliation, by contrast, the organization must classify the activity as ``a GDPR record'' or ``a CCPA record'' and then bolt the other regime on as an exception, which is a commonly observed pattern in most commercial tooling today.
 
@@ -465,11 +474,11 @@ Total & & 84 \\
 \end{tabular}
 \end{table}
 
-Each transition has a distinct character. L1$\to$L2 is essentially \emph{register existence}, where the subdomain's primary records come into being as maintained data at all, and the rework is uniformly low because there is little structure, no enforcement on that structure, and limited contemplation of entity-to-entity relationships. L2$\to$L3 is \emph{spine assembly}, where local records connect to the shared core classes, terminology begins to align to a common vocabulary, and consideration for cross-subdomain relationships begin but are still tolerant for duplication through low normalization. L3$\to$L4 is the \emph{reification cliff}, showcasing more than half of the rework points because structures that existed as simple records and edges at L3 must be retrofitted to carry history, validity intervals, and provenance. L4$\to$L5 is \emph{automation rather than new structure}, where the data model largely stops changing and the rework concerns instrumentation, monitoring hooks, and the closing of feedback loops. An organization budgeting a program, ``budgeting'' here in a broad and not purely financial sense, can read its costs casually off this profile. An L3$\to$L4 plan that funds process change and training without provisioning for time, funding, and technology to handle the versioned schemas and immutable event logs has ultimately underprovisioned the initiative, and it seems plausible to me that this is the next most common reason such initiatives stall.
+Each transition has a distinct character. L1$\to$L2 is essentially \emph{register existence}, where the subdomain's primary records come into being as maintained data at all, and the rework is uniformly low because there is little structure, no enforcement on that structure, and limited contemplation of entity-to-entity relationships. L2$\to$L3 is \emph{spine assembly}, where local records connect to the shared core classes, terminology begins to align to a common vocabulary, and consideration for cross-subdomain relationships begins but is still tolerant for duplication through low normalization. L3$\to$L4 is the \emph{reification cliff}, showcasing more than half of the rework points because structures that existed as simple records and edges at L3 must be retrofitted to carry history, validity intervals, and provenance. L4$\to$L5 is automation rather than new structure, where the data model largely stops changing and the rework concerns instrumentation, monitoring hooks, and the closing of feedback loops. An organization budgeting a program, ``budgeting'' here in a broad and not purely financial sense, can read its costs casually off this profile. An L3$\to$L4 plan that funds process change and training without provisioning for time, funding, and technology to handle the versioned schemas and immutable event logs has ultimately underprovisioned the initiative, and it seems plausible to me that this is the next most common reason such initiatives stall.
 
-In another dimension of change, it is also important to recognize that progress is often not free. The model documents 36 cross-subdomain dependencies, where certain maturity improvements presuppose that adjacent subdomains are already operating at a minimum (i.e. change-compatible) level. If they are not, the dependent subdomain simply will not accept the data model change as a function of incompatibility. Entities, Roles \& Accountability is the most depended-upon subdomain (7 inbound dependencies), followed by Legal Basis Management (6), which identifies these two as the highest-return early investments. Regulatory Reporting \& Disclosure, by contrast, is downstream of nearly everything, consistent with the principle that a report should be a view over the inventories rather than hand-kept primary data. Together, the rework points and the dependency map allow investment to be articulated and planned against a delta map, rather than reverse-engineered from known past program deficiencies. This is one of the model's headline practitioner utilities, making the costs of getting better estimable in advance by a mechanism of better forward view.
+In another dimension of change, it is also important to recognize that progress is rarely free. The model documents 36 cross-subdomain dependencies, where certain maturity improvements presuppose that adjacent subdomains are already operating at a minimum (i.e., change-compatible) level. If they are not, the dependent subdomain simply will not accept the data model change as a function of incompatibility. Entities, Roles \& Accountability is the most depended-upon subdomain (7 inbound dependencies), followed by Legal Basis Management (6), which identifies these two as the highest-return early investments. Regulatory Reporting \& Disclosure, by contrast, is downstream of nearly everything, consistent with the principle that a report should be a view over the inventories rather than hand-kept primary data. Together, the rework points and the dependency map allow investment to be articulated and planned against a delta map, rather than reverse-engineered from known past program deficiencies. This is one of the model's headline practitioner utilities, making the costs of getting better estimable in advance by a mechanism of better forward view.
 
-A final condition observed was the potential cost of operating at mixed maturity levels, which most organizations do in practice. Cross-subdomain joins require a degree of symmetry between their endpoints. When one side of a join operates at L4 and the other at L3, the L4 side must either degrade to L3 semantics across that join or use translation logic. Functionally, reification-validity semantics do not degrade gracefully, making translation approaches difficult in practice and leading to second-order effects such as losing provenance. This could force re-derivation (i.e., backsliding), which should be viewed as a kind of fault when it occurs. Functionally, this would be expected to occur during evolutions such as system migrations, M\&A integrations, and legacy decommissions and should be flagged as risks to the program's maturity and its data integrity, rather than being absorbed as IT work. Practically, an approach where level parity within connected clusters of subdomains is indicated, especially over maximizing any single subdomain in isolation. The full transition-level rework distribution and the pairwise dependency matrix appear in Appendix~E (Tables~\ref{tab:reference-data-model-rework-distribution} and~\ref{tab:reference-data-model-dependency-map}).
+A final condition observed was the potential cost of operating at mixed maturity levels, which most organizations do in practice. Cross-subdomain joins require a degree of symmetry between their endpoints. When one side of a join operates at L4 and the other at L3, the L4 side must either degrade to L3 semantics across that join or use translation logic. Functionally, reification-validity semantics do not degrade gracefully, making translation approaches difficult in practice and leading to second-order effects such as losing provenance. This could force re-derivation (i.e., backsliding), which should be viewed as a kind of fault when it occurs. Functionally, this would be expected to occur during evolutions such as system migrations, M\&A integrations, and legacy decommissions and should be flagged as risks to the program's maturity and its data integrity, rather than being absorbed as IT work. Practically, an approach where level parity within connected clusters of subdomains is indicated, especially over maximizing any single subdomain in isolation. The full transition-level rework distribution and the pairwise dependency matrix appear in Appendix~D (Tables~\ref{tab:reference-data-model-rework-distribution} and~\ref{tab:reference-data-model-dependency-map}).
 
 \subsection{Accounting for and expressing risk tolerance}\label{sec:risk}
 
@@ -477,10 +486,10 @@ Certain entities and relationships appear in neither the clean core nor any regu
 were identified and made explicit, each documented with its options and
 trade-offs. The full catalog appears in Appendix~F(Table~\ref{tab:decisions}) and is browsable in the model explorer (Section~\ref{sec:artifact}).
 
-Beyond entities and relationships, the work surfaced the importance of implicit taxonomies and taxonomy-like typing schemes in the design of and within certain attributes. This is fundamentally expressed in degrees of coarseness, where the more finely tuned the individual taxonomy, the more precisely risk is expressed. This contemplates that intentionally applied precision serves as an expression of risk tolerance within that area. A universally applicable example is the precision an organization uses to describe the unit types of personal data. The choice carries no inherent entity relationship, but an organization that believes it can describe all possible types of personal data in 30 options versus 100 versus 300 is inherently accepting risk through its apparent precision or lack thereof. A hospital may need to represent dozens of medical-specific personal data attributes because the varied sensitivity and abuse cases associated with diagnosis information differ from those of a common test result such as an EKG. Further, a food manufacturer may reasonably compress this same information under the single umbrella of ``Medical Records''. Coarseness need not be uniformly applied, though, and these specific decisions remain a valuable lever for an organization to articulate its risk tolerance as part of the construction of its due diligence processes. This also reflects a practical reality that organizations must establish processes before they monitor them.
+Beyond entities and relationships, the work surfaced the importance of implicit taxonomies and taxonomy-like typing schemes in the design of and within certain attributes. This is fundamentally expressed in degrees of coarseness, where the more finely tuned the individual taxonomy, the more precisely risk is expressed. This contemplates that intentionally applied precision serves as an expression of risk tolerance within that area. A universally applicable example is the precision an organization uses to describe the unit types of personal data. The choice carries no inherent entity relationship, but an organization that believes it can describe all possible types of personal data in 30 options versus 100 versus 300 is inherently accepting risk through its apparent precision or lack thereof. A hospital may need to represent dozens of medical-specific personal data attributes because the varied sensitivity and abuse cases associated with diagnosis information differ from those of a common test result such as an EKG. However, a toy manufacturer may reasonably compress this same information under the single umbrella of ``Medical Records''. Coarseness need not be uniformly applied, though, and these specific decisions remain a valuable lever for an organization to articulate its risk tolerance as part of the construction of its due diligence processes. This also reflects a practical reality that organizations must establish processes before they monitor them.
 
 The same pattern recurs at larger scales. Orienting the risk taxonomy on harms, rights, or impacts is a defensible choice in every direction, with each orientation represented among the authoritative sources, and the choice propagates into assessment templates, mitigation typing, and regulator-facing narratives. Whether the four control themes inherited from ISO/IEC
-27002~\cite{iso27002} are modeled as a class hierarchy or an attribute facet has no correct answer in the abstract, but it carries material consequences for how controls are queried, inherited, and reported once thousands of instances exist.
+27002~\cite{iso27002} are modeled as a class hierarchy or an attribute facet has no correct answer in the abstract, but carries material consequences for how controls are queried, inherited, and reported once thousands of instances exist.
 
 Similarly, adopting a CMMI target of L2 versus L4 in a process subdomain is itself a manifestation of risk tolerance. However, it was observed that opportunity for discretion narrows as maturity rises. This is attributable to the many defensible decisions either way at L2 collapsing toward a single valid resolution once versioning and provenance requirements are implemented between L3, L4, and L5. This creates an imperative for organizations approaching a transition to resolve the relevant decisions before continuing. 
 
@@ -554,7 +563,7 @@ The model is delivered in two coordinated forms.
   \label{fig:explorer-detail}
 \end{figure}
 
-A third form is contemplated but was not delivered as part of this work. This will be an implementation guide that will include a documentation set, including the per-subdomain models with individual visualizations along with the decision and maturity-delta catalogs. This is further discussed in Section~\ref{sec:lqfw}.
+A third form is contemplated but was not delivered as part of this work. This will be an implementation guide that will include a documentation set, including the per-subdomain models with individual static visualizations along with the decision and maturity-delta catalogs. This is further discussed in Section~\ref{sec:lqfw}.
 
 \section{Limitations, Qualifications, and Future Work}\label{sec:lqfw}
 
@@ -585,7 +594,7 @@ I contemplate that there are at least five opportunities for future work buildin
     \item  Internal validity can be deepened through synthetic-data testing against the Turtle serialization. 
     \item External validity can be expanded through a screened expert panel and subsequent continuous feedback during organizational implementations once scoping burden can be supported.
     \item There is value in this work as a diagnostic framework to help organizations assess their privacy program maturity and readiness via their data. This channels questions that sound like \emph{What (data) do you have today? What (tasks) could/should operationalize next? What domains could be operationalized with relatively low cost?} and \emph{What is the corpus of privacy program tasks that needs to be performed?}
-    \item There may be further diagnostic merit in using the model as an evaluation instrument against common commercial tools with the aim of pinpointing exactly what maturity level their implicit data structures imply, extend to, or max out at.
+    \item There may be merit in using the model as an evaluation instrument against commercial tools with the aim of pinpointing exactly what maturity level their implicit data structures imply, extend to, or max out at.
 \end{enumerate}
 
 \section{Conclusions}\label{sec:conclusion}
@@ -598,16 +607,15 @@ While the artifacts prove to solve many lesser problems, four conclusions go bey
 
 \begin{enumerate}
     \item The DPV is not a schema, and the data structures required to operate a privacy program for a large organization with multi-jurisdictional compliance imperatives exceed the DPV's surface by an order of magnitude.
-    \item The shared entities and relationships across regulations are smaller than any one regulation implies, which makes the data architecture of a regulation-agnostic core and the associated overlays an ideal approach for organizations holding two or more regulatory obligations. This value increases with as n regulatory of obligations increases.
+    \item The shared entities and relationships across regulations are smaller than any one regulation implies, which makes the data architecture of a regulation-agnostic core and the associated overlays an ideal approach for organizations holding two or more regulatory obligations. This value seemingly increases proportionately with the number of regulatory obligations an organization incurs.
     \item The importance of identifying and reserving decisions as a function of risk. Further, the notion that decisions that go unrecognized through latent implementation of defaults carry risk implicitly. The approximately forty implementation decisions in the model have no singular correct answer, and each should be resolved by every implementing organization, whether the implementer recognizes these as choices to be made with their own advantages and drawbacks.
     \item Target process maturity, while imperfect, is a valid way to express risk tolerance through logically related process groupings (subdomains). Maturity parameterization as a technique enables visibility into the process and data rework points that are required for maturity advancement. Understanding these rework points, dependencies, and decisions further allows for shifting of their corresponding expenses from largely ``discovered after the fact'' to planned, and the concentration of the cost cliff between L3 and L4 is also now known in advance rather than after a program has stalled. 
 
     
 \end{enumerate}
 
-There is also a lesson here beyond privacy. Ontologies, taxonomies, and reference schemas exist for a whole host of domains, including incident response, vulnerability management, and identity, and the approach demonstrated here generalizes. Ideate on what the data would look like if the problem no longer existed, work backward from that, and watch the places where you do not control your own data structures. If you want to get better at something, endeavor to be more precise. That mindset applies to data through normalization, and the quality of any AI system is bounded by the quality of the semantic structures beneath it. Garbage in, garbage out will always prevail. The remaining question is the one this model can price but not answer for you. When is it time to do the work, rather than accept the status quo as a buy-versus-build decision?
-
-
+Lastly, I believe there is a lesson here on approach. Ontologies, taxonomies, and reference schemas exist for thousands of data applications. Further, standards of any type imply entities and relationships where one may not exist. Each of these creates a mechanism to take a data-driven approach to problem solving and process maturity issues for that space. There is real value in an approach that ideates on what the data would look like if the problem no longer existed and working backward from that, where getting better is a function of getting more precise, which is tactically applied through forced data normalization.
+\clearpage
 \section*{Acknowledgments}
 \subsection*{GitHub Repository}
     Visit the repository to access the source code, track ongoing development, report issues, and stay up to date with the latest changes.
@@ -620,11 +628,12 @@ There is also a lesson here beyond privacy. Ontologies, taxonomies, and referenc
 \subsection*{Thanks}
 The author would like to thank the following individuals and groups for their influence on this work. 
 \begin{itemize}
-    \item Dr. Brenden Kuerbis and Mr. Emad AbuKhousa for their continued review of this content throughout the course where it was a product.
+    \item Dr. Brenden Kuerbis and Mr. Emad AbuKhousa for their continued review of this content throughout the course it was a product of.
     \item The W3C Data Privacy Vocabularies and Controls Community Group for their contributions.
     \item Michael Ernst of the University of Washington, for his published
 advice on \href{https://homes.cs.washington.edu/~mernst/advice/write-technical-paper.html}{writing technical papers}
 and \href{https://homes.cs.washington.edu/~mernst/advice/giving-talk.html}{giving technical presentations}.
+\item This document was compiled using \href{https://github.com/MemoJimenez/Rho-class}{Rho-class}, a \LaTeX{} template developed by Guillermo Jimenez.
 \end{itemize}
 \subsection*{AI Use Disclosures}
 Generative AI was used in the completion of this work in the following ways.
@@ -636,8 +645,7 @@ Generative AI was used in the completion of this work in the following ways.
     \item Transforming the analysis schema to a format compatible with the web-based explorer.
     \item Various code implementations and improvements within the web-based explorer application.
 \end{itemize}
-\subsection*{Template}
- This document was compiled using \href{https://github.com/MemoJimenez/Rho-class}{Rho-class}, a \LaTeX{} template developed by Guillermo Jimenez.
+ 
  \clearpage
 \onecolumn
 %\appendix
@@ -645,18 +653,18 @@ Generative AI was used in the completion of this work in the following ways.
 \subsection*{Appendix A: Full Listing of Input Taxonomies by Author Type Classification}
 \label{app:a}
 \subsubsection*{Independent Standards}
-\printbibliography[heading=none,filter=taxonomystandards]
+\printbibliography[heading=none,filter=taxonomystandards,env=nolabelbib]
 \subsubsection*{Governmental}
-\printbibliography[heading=none,filter=taxonomyregulatory]
+\printbibliography[heading=none,filter=taxonomyregulatory,env=nolabelbib]
 \subsubsection*{Commercial}
-\printbibliography[heading=none,filter=taxonomycommercialtools]
+\printbibliography[heading=none,filter=taxonomycommercialtools,env=nolabelbib]
 \subsubsection*{Academic Work}
-\printbibliography[heading=none,filter=taxonomyacademicwork]
+\printbibliography[heading=none,filter=taxonomyacademicwork,env=nolabelbib]
 \clearpage
 \phantomsection
 \subsection*{Appendix B: Mapping of Taxonomies to Domains}
 \label{app:b}
-
+\togglefalse{trackcited}
 \begin{longtable}{@{}p{0.28\linewidth} p{0.68\linewidth}@{}}
 \caption{Input taxonomies mapped to the twelve capability-area subdomains of
 the reference model, based on the DPV.}
@@ -726,7 +734,7 @@ the reference model, based on the DPV.}
 \end{longtable}
 
 \clearpage
-\subsection*{Appendix D: Summary Analysis Statistics}
+\subsection*{Appendix C: Summary Analysis Statistics}
 \label{app:e}
 
 \begin{small}
@@ -897,9 +905,9 @@ the reference model, based on the DPV.}
 
 \end{longtable}
 \end{scriptsize}
-
+\toggletrue{trackcited}
 \clearpage
-\subsection*{Appendix E: Risk-Discretionary Implementation Decisions}
+\subsection*{Appendix D: Risk-Discretionary Implementation Decisions}
 \label{app:decisions}
 
 \begin{small}
@@ -907,7 +915,7 @@ the reference model, based on the DPV.}
 \renewcommand{\arraystretch}{1.25}
 
 \begin{longtable}{@{}p{0.06\textwidth} p{0.88\textwidth}@{}}
-\caption{The forty risk-discretionary implementation decisions.}
+\caption{The risk-discretionary implementation decisions.}
 \label{tab:decisions}\\
 
 \hline
