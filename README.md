@@ -1,4 +1,4 @@
-# Privacy Reference Model
+# Privacy Reference Data Model for Large Organizations
 
 A reference data model for organizational privacy operations, grounded in the [W3C Data Privacy Vocabulary (DPV)](https://w3id.org/dpv) and spanning 12 privacy capability subdomains.
 
