@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Reference Model — Interactive Explorer</title>
+<title>Privacy  RDM Interactive Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -513,8 +513,7 @@
 
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <div class="text-md font-semibold text-slate-900 leading-tight">Reference Model</div>
-      <div class="text-xs text-slate-500 leading-tight mt-1">Interactive Explorer</div>
+      <div class="text-md font-semibold text-slate-900 leading-tight">Privacy Reference Data Model</div>
     </div>
     <nav class="sidebar-nav" aria-label="Primary">
       <template x-for="v in views" :key="v.id">
@@ -536,12 +535,12 @@
       <button @click="dismissIntro('home')" class="intro-dismiss" title="Dismiss intro" aria-label="Dismiss intro">
         <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
       </button>
-      This is the <strong>Interactive Explorer</strong> for an implementation-ready reference data model for privacy programs, inspired by W3C DPV. Use the sidebar to browse the 12 capability areas, the entity and relationship catalogs, the risk-discretionary decisions, the maturity delta map, or the spatial graph. The model is regulation-agnostic at its core and indexed by your target CMMI maturity level per domain. Now at <strong>v1.0</strong> (2026-07-04, v1.1 Option A expansion 2026-07-05): 52 core entities, 96 core relationships, 2 marker classes, 102 rework points (42 original L3→L4 + 26 v1.0 cross-cutting + 34 Option A per-domain expansion across L1→L2, L2→L3, L4→L5), and 15 Charter decisions D1–D15. Every rework point is tagged with a costCategory (structural-retrofit / spine-assembly / register-establishment / operational-automation / cross-cutting-declaration) so the schema-rework surface (structural-retrofit + spine-assembly = 69 items) is distinguishable from register-existence and automation work. Hover the small info icons on any control to see a short explanation, or hover any <span class="jargon">dotted term</span> in body text for its definition.
+      This is the <strong>Interactive Explorer</strong> for a reference data model for data privacy in large organizations, inspired by W3C DPV. Use the sidebar to browse the 12 capability areas, the entity and relationship catalogs, the risk-discretionary decisions, the maturity delta map, or the spatial graph. Hover the small info icons on any control to see a short explanation, or hover any <span class="jargon">dotted term</span> in body text for its definition.
     </div>
 
     <div>
-      <h1 class="page-title">An implementation-ready privacy data model</h1>
-      <p class="page-desc mt-2">A regulation-agnostic
+      <h1 class="page-title">A privacy reference data model for large organizations</h1>
+      <p class="page-desc mt-2">A regulation-agnostic reference data model for data privacy in large organizations with a
         <span class="tt-wrap"><span tabindex="0" class="jargon">core spine</span><span class="tt-pop" role="tooltip"><strong>Core / spine.</strong> The non-negotiable backbone of the model. Every implementation has these entities and relationships, at every maturity level.</span></span>,
         <span class="tt-wrap"><span tabindex="0" class="jargon">profile overlays</span><span class="tt-pop" role="tooltip"><strong>Regulation profile.</strong> A regulation-specific overlay that sits on top of the regulation-agnostic core. The core stays jurisdiction-neutral; the profile attaches mandatory fields, named instances, and report templates a specific regulation requires.</span></span>,
         <span class="tt-wrap"><span tabindex="0" class="jargon">maturity-gated</span><span class="tt-pop" role="tooltip"><strong>Maturity-gated.</strong> Only required as your privacy program becomes more mature. The reference model adds these structures as you advance through CMMI levels.</span></span> periphery, and
@@ -574,6 +573,11 @@
         Click to view the Reference Data Model
         <svg class="w-4 h-4" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="6 4 10 8 6 12"/></svg>
       </button>
+    </div>
+
+    <div class="mt-8 text-xs text-slate-500">
+      <div>Website Last Updated: 08/02/26</div>
+      <div>Model Last Updated: 07/04/26</div>
     </div>
 
   </section>
